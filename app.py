@@ -26,21 +26,19 @@ all_courses = get_courses()
 def courses(class_name):
     if class_name in all_courses:
         course_data = all_courses[class_name]
-        img_paths = []
-        courses_list = []
-        course_file_list = []
+        img_paths = {}
+        courses_list = {}
         # Collect image paths, courses, and course files
         for course_data_dict in course_data:
             for course_name, course_files in course_data_dict.items():
-                img_paths.append(f"/static/img/courses/{class_name}/{course_name}.jpg")
-                courses_list.append(course_name)
-                course_file_list.append(course_files)
-        
+                img_paths[course_name] = []
+                for course_file in course_files:
+                    img_paths[course_name].append(f"/static/img/courses/{class_name}/{course_file}.jpg")
+                courses_list[course_name] = (course_files) 
         # Render the courses page with dynamic data
-        print(request.url)
         return render_template('courses.html', class_name=class_name, 
                                img_paths=img_paths, courses=courses_list, 
-                               course_files=course_file_list, classes=all_courses.keys(),
+                               classes=all_courses.keys(),
                                current_url=quote(request.path))
     else:
         return render_template('404.html')

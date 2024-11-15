@@ -134,7 +134,7 @@
             padding-left: 2em;
         }
 
-        #toggle-btn{
+        .toggle-btn{
             margin-left: auto;
             padding: 1em;
             border: none;
@@ -147,9 +147,17 @@
             }
         }
 
-        #toggle-btn:hover {
+        .toggle-btn:hover {
             background-color: var(--hover-clr);
-        }    
+        }
+        @media (max-width: 768px) {
+            #sidebar{
+                width: 100vw;
+            }
+                #sidebar.close{
+                display: none;
+            }
+        }
     </style>
 
         {% block extra_style %}{% endblock %}
@@ -160,7 +168,7 @@
             <li>
                 <img src="{{ url_for('static', filename='img/dash/logo website.svg') }}" alt="logo">
                 <span class="logo">Study World</span>
-                <button onclick="toggleSidebar()" id="toggle-btn">
+                <button onclick="toggleSidebar()" class="toggle-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M440-240 200-480l240-240 56 56-183 184 183 184-56 56Zm264 0L464-480l240-240 56 56-183 184 183 184-56 56Z"/></svg>
                 </button>
             </li>
@@ -204,10 +212,18 @@
             </li>
         </ul>
     </nav>
+
     {% block main_content %}{% endblock %}
     <script>
-        const toggleButton = document.getElementById('toggle-btn');
+        const toggleButton = document.getElementsByClassName('toggle-btn')[0];
         const sidebar = document.getElementById('sidebar');
+
+        function closeAllSubMenu(){
+            Array.from(sidebar.getElementsByClassName('show')).forEach(ul => {
+                ul.classList.remove('show');
+                ul.previousElementSibling.classList.remove('rotate');
+            })
+        }
         
         function toggleSidebar() {
             sidebar.classList.toggle('close');
@@ -230,12 +246,6 @@
                 sidebar.classList.toggle('close');
                 toggleButton.classList.toggle('rotate');
             }
-        }
-        function closeAllSubMenu(){
-            Array.from(sidebar.getElementsByClassName('show')).forEach(ul => {
-                ul.classList.remove('show');
-                ul.previousElementSibling.classList.remove('rotate');
-            })
         }
 
     </script>
