@@ -97,6 +97,10 @@
             font-weight: bold;
         }
 
+        .modules{
+            display: grid;
+        }
+
         .modules ul {
             display: flex;
             gap: 20px;
@@ -104,7 +108,7 @@
             padding: 0;
             margin: 0;
         }
-
+        
         .module-card {
             list-style-type: none;
             background-color: #ffffff;
@@ -179,6 +183,30 @@
                 display: none;
             }
         }
+        .hidden{
+            display: none;
+        }
+        #button-container{
+            position: relative;
+            text-align: center;
+        }
+        #button-container hr{
+            border: none;
+            margin-top: 2px;
+            border-top: 1px solid #8a8a8a;
+        }
+        #button-container button{
+            position: relative;
+            background-color: #333333;
+            color: #ffffff;
+            margin-top: 4px;
+            border: none;
+            padding: 5px;
+            cursor: pointer;
+        }
+        #button-container button:hover{
+            color: #ff1616;
+        }
     </style>
 {% endblock %}
 {% block main_content %}
@@ -202,7 +230,7 @@
         <div class="modules">
             <ul>
                 {% for module in modules %}
-                <li class="module-card">
+                <li class="module-card {% if loop.index > 4 %}hidden{% endif %}">
                     <a href="{{ url_for('course_file_route', class_name=class_name, course=course, course_file=module) }}">
                     <img src="{{ url_for('static', filename='img/courses/'+ class_name + '/' + course + '/' + module + '.jpg') }}" 
                         alt="{{ image }}">
@@ -217,8 +245,33 @@
                 </li>
                 {% endfor %}
             </ul>
+            <div id="button-container">  
+                <hr>  
+                <button onclick="toggleShowAll(this)">show all</button>
+            </div>
         </div>
     </section>
     {% endfor %}
 </main>
+{% endblock %}
+{% block extra_script %}
+<script>
+    function toggleShowAll(button){
+        const hidden_content = button.previousElementSibling.querySelectorAll('course-card.hidden');
+        const all_content = button.previousElementSibling.querySelectorAll('course-card');
+        if(hidden.length > 0){
+            hidden_content.forEach(element => {
+                element.classList.remove('hidden');
+            });
+            button.textContent = 'show less';
+        }else{
+            all_content.forEach((index, card) => {
+                if(index >= 4){
+                    card.classList.add('hidden');
+                }
+            });
+            button.textContent = 'show all';
+        }
+    }
+</script>
 {% endblock %}
