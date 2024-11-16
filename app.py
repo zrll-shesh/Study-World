@@ -1,4 +1,4 @@
-from flask import Flask, render_template,request
+from flask import Flask, render_template, request, redirect, url_for
 from urllib.parse import quote
 import os
 
@@ -21,39 +21,39 @@ def get_courses():
                     courses[class_name].append(course_data)
     return courses
 
-all_courses = get_courses()
 @app.route('/courses/<class_name>')
 def courses(class_name):
-    if class_name in all_courses:
-        course_data = all_courses[class_name]
-        img_paths = {}
-        courses_list = {}
-        # Collect image paths, courses, and course files
-        for course_data_dict in course_data:
-            for course_name, course_files in course_data_dict.items():
-                img_paths[course_name] = []
-                for course_file in course_files:
-                    img_paths[course_name].append(f"/static/img/courses/{class_name}/{course_file}.jpg")
-                courses_list[course_name] = (course_files) 
-        # Render the courses page with dynamic data
-        return render_template('courses.html', class_name=class_name, 
-                               img_paths=img_paths, courses=courses_list, 
-                               classes=all_courses.keys(),
-                               current_url=quote(request.path))
-    else:
-        return render_template('404.html')
+    try:
+        all_courses = get_courses()
+        if class_name in all_courses:
+            course_data = all_courses[class_name]
+            courses_list = {}
+            # Collect image paths, courses, and course files
+            for course_data_dict in course_data:
+                for course_name, course_files in course_data_dict.items():
+                    courses_list[course_name] = (course_files)
+            return render_template('courses.html', class_name=class_name,
+                                courses=courses_list, 
+                                classes=all_courses.keys(),
+                                current_url=quote(request.path))
+        else:
+            return redirect(url_for(handle_exception))
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 # Route for rendering specific course files
 @app.route('/courses/<class_name>/<course>/<course_file>')
 def course_file_route(class_name, course, course_file):
+    all_courses = get_courses()
     course_file_path = os.path.join(courses_dir, class_name, course, f"{course_file}.html")
     if os.path.exists(course_file_path):
         return render_template(course_file_path, classes=all_courses.keys())
     else:
-        return render_template('404.html')
+        return redirect(url_for(handle_exception))
 
 @app.route('/')
 def home():
+    all_courses = get_courses()
     example = [
         {"name": "Kimia", "class": "Kelas XII MIPA", "image": "chemistry.webp"},
         {"name": "Biologi", "class": "Kelas XI MIPA", "image": "biology.webp"},
@@ -74,6 +74,11 @@ def settings():
 @app.route('/login')
 def login():
     return render_template('login.html')
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    error_code = getattr(e, 'code', 500)
+    return render_template('error.html', error_code=error_code), error_code
 
 if __name__ == '__main__':
     app.run(debug=True)

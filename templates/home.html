@@ -2,7 +2,6 @@
 {% block extra_style %}
     <style>
         main{
-            flex: 1;
             display: flex;
             flex-direction: column;
         }
@@ -16,7 +15,11 @@
             padding: 10px;
             border-bottom: #8a8a8a solid 1px;
             gap: 10px;
+            position: sticky;
+            top: 0;
+            background-color: #11121a;
         }
+
         header input[type="text"] {
             flex: 1;
             margin-left: 5px;
@@ -82,8 +85,7 @@
             padding-bottom: 6px;
         }
 
-        .flex-container-1 img,
-        .flex-container-1 svg{
+        .flex-container-1 img{
             width: 40px;
             height: auto;
             margin-left: 20px;
@@ -195,7 +197,7 @@
                 <img src="{{ url_for('static', filename='img/dash/course-logo.svg') }}">
                 <h2>Latest Course</h2>
             </div>
-            <nav class="courses">
+            <div class="courses">
                 <ul>
                     {% for course in courses %}
                     <li class="course-card">
@@ -212,7 +214,7 @@
                     </li>
                     {% endfor %}
                 </ul>
-            </nav>
+            </div>
         </section>
     </main>
 {% endblock%}
