@@ -1,0 +1,60 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error {{ error_code }}</title>
+    <style>
+        :root{
+            --base-clr: #11121a;
+            --line-clr: #42434a;
+            --hover-clr: #222533;
+            --text-clr: #e6e6ef;
+            --accent-clr: #5e63ff;
+            --secondary-text-clr: #b0b3c1;
+        }
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            background-color:  var(--base-clr);
+            color: var(--text-clr);
+            font-family: Poppins, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container{
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: var(--base-clr);
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 100px;
+            align-items: center;
+            display: grid;
+            justify-content: center;
+            gap: 10px;
+        }
+        .error_message{
+            color: #ff1616;
+        }
+        .back_to_home{
+            display: inline-block;
+            text-align: center;
+            padding: 10px 20px;
+            background-color: #ff1616;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Error {{ error_code }}</h1>
+        <p class="error_message">Sepertinya ada yang salah</p>
+        <p>Tolong coba lagi nanti.</p>
+        <a href="{{ url_for('views.home') }}" class="back_to_home">Back to Home</a>
+    </div>
+</body>
+</html>
