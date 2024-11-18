@@ -52,8 +52,11 @@
 <body>
     <div class="container">
         <h1>Error {{ error_code }}</h1>
+        {% if error_message %}<p class="error_message">{{ error_message }}</p>
+        {% else %}
         <p class="error_message">Sepertinya ada yang salah</p>
         <p>Tolong coba lagi nanti.</p>
+        {% endif %}
         <a href="{{ url_for('views.home') }}" class="back_to_home">Back to Home</a>
     </div>
 </body>

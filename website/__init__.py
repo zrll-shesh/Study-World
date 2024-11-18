@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
 from dotenv import load_dotenv
 import os 
+from flask_login import LoginManager
 
 db = SQLAlchemy()
 DB_NAME = "database.db"
@@ -19,12 +20,17 @@ def create_app():
     app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
     app.config['MAIL_PASSWORD'] =  os.getenv('MAIL_PASSWORD')
     app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')
+    login_manager = LoginManager()
+    login_manager.login_view = 'auth.auth_page'
+
     from .views import views
     from .auth import auth
     from .admin import admin
     from .models import User, Education_Content
     db.init_app(app)
     mail.init_app(app)
+    login_manager.init_app(app)
+
 
     app.register_blueprint(views, url_prefix='/')
     app.register_blueprint(auth, url_prefix='/')
@@ -32,10 +38,13 @@ def create_app():
 
     create_database(app)
 
+    @login_manager.user_loader
+    def load_user(id):
+        return User.query.get(int(id))
+    
     return app
 
 def create_database(app):
     if not os.path.exists('website/' + DB_NAME):
         with app.app_context():
             db.create_all()
-        print('Created Database!')

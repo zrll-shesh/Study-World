@@ -6,6 +6,8 @@ from . import mail, db
 from flask_mail import Message
 from werkzeug.security import generate_password_hash, check_password_hash
 import random
+from flask_login import login_user, login_required, logout_user, current_user
+
 
 auth = Blueprint('auth', __name__)
 
@@ -36,6 +38,7 @@ def login():
     user = User.query.filter_by(email=email).first()
     if user: 
         if check_password_hash(user.password, password):
+            login_user(user, remember=True)
             if user.admin:
                 return jsonify({"success": True, 'redirect': url_for('admin.home')})
             else:    
@@ -89,7 +92,7 @@ def signup():
 @auth.route('/otp', methods=['POST'])
 def otp_confirmation():
     data = request.get_json()
-    otp_input = data.get('otp')
+    otp_input = int(data.get('otp'))
     email = session.get('email')
     response = {
         "success": False,
@@ -101,11 +104,16 @@ def otp_confirmation():
     elif email in otp_stored and otp_stored[email]['otp'] == otp_input:
         username = otp_stored[email]['username']
         password = otp_stored[email]['password']
-        new_user = User(email=email, name=username, password=password)
+        if User.query.count() == 0:
+            print("You're an admin")
+            new_user = User(email=email, username=username, password=password, admin=True)
+        else:
+            new_user = User(email=email, username=username, password=password)
         db.session.add(new_user)
         db.session.commit()
         del otp_stored[email]
         session.pop('email', None)
+        login_user(new_user, remember=True)
         response = {
             "success": True,
             "redirect" : url_for('views.home')
@@ -115,5 +123,7 @@ def otp_confirmation():
     return jsonify(response)
 
 @auth.route('/logout')
+@login_required
 def logout():
+    logout_user()
     return redirect(url_for('auth.auth_page'))

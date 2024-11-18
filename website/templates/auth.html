@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Fontawesome CDN Link -->
+    <title>Authintication Form</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
       /* Google Font Link */
@@ -386,9 +386,15 @@
         .hidden{
           display: none !important;
         }
+        #loading{
+          width: 100vh;
+          height: auto;
+          mix-blend-mode: difference;
+        }
     </style>
    </head>
 <body>
+  <img id="loading" class="hidden" src="{{ url_for('static', filename='loading.gif') }}" alt="" id="loading">
     <div id="alert-error" class="hidden">
     <div id="alert-error-text"></div>
         <button type="button" id="close" data-dismiss="alert" aria-label="Close">
@@ -434,7 +440,7 @@
               <div class="button input-box">
                 <input type="submit" value="Submit">
               </div>
-              <div class="text sign-up-text">Belum punya akun? <label for="flip">Sign up now</label></div>
+              <div class="text sign-up-text">Belum punya akun? <label for="flip">Sign up</label></div>
             </div>
         </form>
       </div>
@@ -463,7 +469,7 @@
               <div class="button input-box">
                 <input type="submit" value="Submit">
               </div>
-              <div class="text sign-up-text">Sudah punya akun? <label for="flip">Login now</label></div>
+              <div class="text sign-up-text">Sudah punya akun? <label for="flip">Login</label></div>
             </div>
       </form>
     </div>
@@ -520,6 +526,11 @@
         document.getElementById("alert-error").classList.toggle("hidden")
     });
     
+      function toggleLoading(){
+        document.getElementById("container").classList.toggle("hidden")
+        document.getElementById('loading').classList.toggle("hidden"); 
+      }
+
     // function to send form data using AJAX
     document.addEventListener("DOMContentLoaded", function () {
       const forms = document.querySelectorAll(".form");
@@ -530,7 +541,7 @@
           const formData = new FormData(form);
           const dataObject = {};
           formData.forEach((value, key) => {
-          dataObject[key] = value;
+            dataObject[key] = value;
           });
           let url = "";
           if (index === 0) {
@@ -538,6 +549,7 @@
           } else {
             url = "{{ url_for('auth.signup') }}";
           }
+          toggleLoading();
           fetch(url, {
             method: "POST",
             headers: {
@@ -551,12 +563,11 @@
                   window.location.href = data.redirect;
                 }
                 else{
-                  const otpForm = document.getElementById("otp-confirmation");
-                  const conteiner = document.getElementById("container");
-                  otpForm.classList.toggle("hidden");
-                  conteiner.classList.toggle("hidden");
+                  document.getElementById("loading").classList.toggle("hidden")
+                  document.getElementById("otp-confirmation").classList.toggle("hidden");
                 }
               } else {
+                toggleLoading();
                 document.getElementById('alert-error-text').textContent = data.Message;
                 document.getElementById('alert-error').classList.toggle("hidden");
               }
@@ -601,7 +612,7 @@
             otp_data += value;
           });
           const dataObject = {'otp' : otp_data};
-          fetch("{{ url_for('auth.otp') }}", {
+          fetch("{{ url_for('auth.otp_confirmation') }}", {
             method: "POST",
             headers: {
             "Content-Type": "application/json",

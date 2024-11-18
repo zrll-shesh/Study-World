@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, redirect, request,url_for
 from urllib.parse import quote
 from . import db
 import os
+from flask_login import login_required, current_user
 
 views = Blueprint('views', __name__)
 courses_dir = os.path.join(os.getcwd(), "website/templates/courses")
@@ -23,6 +24,7 @@ def get_courses():
     return courses
 
 @views.route('/courses/<class_name>')
+@login_required
 def courses(class_name):
     try:
         all_courses = get_courses()
@@ -45,6 +47,7 @@ def courses(class_name):
 
 # Route for rendering specific course files
 @views.route('/courses/<class_name>/<course>/<course_file>')
+@login_required
 def course_file_route(class_name, course, course_file):
     all_courses = get_courses()
     course_file_path = os.path.join(courses_dir, class_name, course, f"{course_file}.html")
@@ -54,6 +57,7 @@ def course_file_route(class_name, course, course_file):
         return redirect(url_for(views.handle_exception))
 
 @views.route('/home')
+@login_required
 def home():
     try:
         all_courses = get_courses()
@@ -69,10 +73,12 @@ def home():
         print(f"An error occurred: {e}")
 
 @views.route('/profile')
+@login_required
 def profile():
     return render_template('user/profile.html', current_url=request.path)
 
 @views.route('/settings')
+@login_required
 def settings():
     return render_template('user/settings.html', current_url=request.path)
 
