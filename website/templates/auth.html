@@ -589,6 +589,35 @@
                 });
             });
         });
+      
+      //function for send otp form with AJAX
+      document.addEventListener("DOMContentLoaded", function () {
+        const otp_form = document.querySelector(".otp");
+        otp_form.addEventListener("submit", function (event) {
+          event.preventDefault();
+          const formData = new FormData(otp_form);
+          let otp_data = ""
+          formData.forEach((value, key) => {
+            otp_data += value;
+          });
+          const dataObject = {'otp' : otp_data};
+          fetch("{{ url_for('auth.otp') }}", {
+            method: "POST",
+            headers: {
+            "Content-Type": "application/json",
+            },
+            body: JSON.stringify(dataObject)
+          }).then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                window.location.href = data.redirect;
+              } else {
+                document.getElementById('alert-error-text').textContent = data.Message;
+                document.getElementById('alert-error').classList.toggle("hidden");
+              }
+            })
+        })     
+      })
   </script>
 </body>
 </html>

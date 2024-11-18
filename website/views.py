@@ -33,6 +33,7 @@ def courses(class_name):
             for course_data_dict in course_data:
                 for course_name, course_files in course_data_dict.items():
                     courses_list[course_name] = (course_files)
+
             return render_template('user/courses.html', class_name=class_name,
                                 courses=courses_list, 
                                 classes=all_courses.keys(),
@@ -54,15 +55,18 @@ def course_file_route(class_name, course, course_file):
 
 @views.route('/home')
 def home():
-    all_courses = get_courses()
-    example = [
-        {"name": "Kimia", "class": "Kelas XII MIPA", "image": "chemistry.webp"},
-        {"name": "Biologi", "class": "Kelas XI MIPA", "image": "biology.webp"},
-        {"name": "Matematika", "class": "Kelas XI MIPA", "image": "math.webp"},
-        {"name": "Fisika", "class": "Kelas X MIPA", "image": "physics.webp"},
-        {"name": "Python", "class": "Untuk semua", "image": "coding.webp"},
-    ]
-    return render_template('user/home.html', classes=all_courses.keys(), courses=example, current_url=request.path)
+    try:
+        all_courses = get_courses()
+        example = [
+            {"name": "Kimia", "class": "Kelas XII MIPA", "image": "chemistry.webp"},
+            {"name": "Biologi", "class": "Kelas XI MIPA", "image": "biology.webp"},
+            {"name": "Matematika", "class": "Kelas XI MIPA", "image": "math.webp"},
+            {"name": "Fisika", "class": "Kelas X MIPA", "image": "physics.webp"},
+            {"name": "Python", "class": "Untuk semua", "image": "coding.webp"},
+        ]
+        return render_template('user/home.html', classes=all_courses.keys(), courses=example, current_url=request.path)
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 @views.route('/profile')
 def profile():
