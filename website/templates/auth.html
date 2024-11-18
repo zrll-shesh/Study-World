@@ -544,12 +544,14 @@
             dataObject[key] = value;
           });
           let url = "";
+          document.getElementById('alert-error').classList.add("hidden");
           if (index === 0) {
             url = "{{ url_for('auth.login') }}";
           } else {
             url = "{{ url_for('auth.signup') }}";
+            toggleLoading();
+
           }
-          toggleLoading();
           fetch(url, {
             method: "POST",
             headers: {
@@ -567,9 +569,11 @@
                   document.getElementById("otp-confirmation").classList.toggle("hidden");
                 }
               } else {
-                toggleLoading();
+                if (index === 1) {
+                  toggleLoading();
+                }
                 document.getElementById('alert-error-text').textContent = data.Message;
-                document.getElementById('alert-error').classList.toggle("hidden");
+                document.getElementById('alert-error').classList.remove("hidden");
               }
             })
             .catch(error => {

@@ -24,9 +24,9 @@ def home():
 @admin.route('/page-management')
 @admin_required
 def pages():
-    return render_template("admin/home.html", current_url=request.path)
+    return render_template("admin/page-management.html", current_url=request.path)
 
-@admin.route('/user-management', current_url=request.path)
+@admin.route('/user-management')
 @admin_required
 def users():
     return render_template("admin/home.html", current_url=request.path)

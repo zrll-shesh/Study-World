@@ -26,7 +26,7 @@ def create_app():
     from .views import views
     from .auth import auth
     from .admin import admin
-    from .models import User, Education_Content
+    from .models import User
     db.init_app(app)
     mail.init_app(app)
     login_manager.init_app(app)

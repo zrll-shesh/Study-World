@@ -39,7 +39,8 @@ def courses(class_name):
             return render_template('user/courses.html', class_name=class_name,
                                 courses=courses_list, 
                                 classes=all_courses.keys(),
-                                current_url=quote(request.path))
+                                current_url=quote(request.path),
+                                user= current_user)
         else:
             return redirect(url_for(views.handle_exception))
     except Exception as e:
@@ -52,7 +53,7 @@ def course_file_route(class_name, course, course_file):
     all_courses = get_courses()
     course_file_path = os.path.join(courses_dir, class_name, course, f"{course_file}.html")
     if os.path.exists(course_file_path):
-        return render_template(course_file_path, classes=all_courses.keys())
+        return render_template(course_file_path, classes=all_courses.keys(), user= current_user)
     else:
         return redirect(url_for(views.handle_exception))
 
@@ -68,19 +69,19 @@ def home():
             {"name": "Fisika", "class": "Kelas X MIPA", "image": "physics.webp"},
             {"name": "Python", "class": "Untuk semua", "image": "coding.webp"},
         ]
-        return render_template('user/home.html', classes=all_courses.keys(), courses=example, current_url=request.path)
+        return render_template('user/home.html', classes=all_courses.keys(), courses=example, user= current_user, current_url=request.path)
     except Exception as e:
         print(f"An error occurred: {e}")
 
 @views.route('/profile')
 @login_required
 def profile():
-    return render_template('user/profile.html', current_url=request.path)
+    return render_template('user/profile.html', user= current_user, current_url=request.path)
 
 @views.route('/settings')
 @login_required
 def settings():
-    return render_template('user/settings.html', current_url=request.path)
+    return render_template('user/settings.html', user= current_user, current_url=request.path)
 
 @views.errorhandler(Exception)
 def handle_exception(e):

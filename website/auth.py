@@ -107,8 +107,10 @@ def otp_confirmation():
         if User.query.count() == 0:
             print("You're an admin")
             new_user = User(email=email, username=username, password=password, admin=True)
+            url = 'admin.home'
         else:
             new_user = User(email=email, username=username, password=password)
+            url = 'views.home'
         db.session.add(new_user)
         db.session.commit()
         del otp_stored[email]
@@ -116,7 +118,7 @@ def otp_confirmation():
         login_user(new_user, remember=True)
         response = {
             "success": True,
-            "redirect" : url_for('views.home')
+            "redirect" : url_for(url)
         }
     else:
         response['Message'] = "OTP tidak valid"
