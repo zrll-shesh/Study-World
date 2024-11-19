@@ -24,8 +24,7 @@
             max-width: 100vw;
             background-color:  var(--base-clr);
             color: var(--text-clr);
-            display: grid;
-            grid-template-columns: auto 1fr;
+            display: flex;
             font-family: Poppins, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
@@ -154,6 +153,9 @@
         @media (max-width: 768px) {
             #sidebar{
                 width: 100vw;
+            }
+            body{
+                display: block;
             }
                 #sidebar.close{
                 display: none;

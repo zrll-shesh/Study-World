@@ -1,43 +1,21 @@
 from flask import Blueprint, render_template, redirect, request,url_for
 from urllib.parse import quote
-from . import db
+from .models import get_content, TrackViewPoints, TrackFinishPoints
 import os
 from flask_login import login_required, current_user
 
 views = Blueprint('views', __name__)
 courses_dir = os.path.join(os.getcwd(), "website/templates/courses")
-def get_courses():
-    courses = {}
-    for class_name in os.listdir(courses_dir):
-        class_path = os.path.join(courses_dir, class_name)
-        if os.path.isdir(class_path):
-            courses[class_name] = []
-            for course in os.listdir(class_path):
-                course_path = os.path.join(class_path, course)
-                if os.path.isdir(course_path):
-                    course_data = {course: []}
-                    for course_file in os.listdir(course_path):
-                        if course_file.endswith(".html"):
-                            course_name = course_file.replace(".html", "")
-                            course_data[course].append(course_name)
-                    courses[class_name].append(course_data)
-    return courses
 
 @views.route('/courses/<class_name>')
 @login_required
 def courses(class_name):
     try:
-        all_courses = get_courses()
+        all_courses = get_content()
         if class_name in all_courses:
-            course_data = all_courses[class_name]
-            courses_list = {}
-            # Collect image paths, courses, and course files
-            for course_data_dict in course_data:
-                for course_name, course_files in course_data_dict.items():
-                    courses_list[course_name] = (course_files)
-
+            courses_data = all_courses[class_name]
             return render_template('user/courses.html', class_name=class_name,
-                                courses=courses_list, 
+                                courses=courses_data, 
                                 classes=all_courses.keys(),
                                 current_url=quote(request.path),
                                 user= current_user)
@@ -50,9 +28,10 @@ def courses(class_name):
 @views.route('/courses/<class_name>/<course>/<course_file>')
 @login_required
 def course_file_route(class_name, course, course_file):
-    all_courses = get_courses()
+    all_courses = get_content()
     course_file_path = os.path.join(courses_dir, class_name, course, f"{course_file}.html")
     if os.path.exists(course_file_path):
+        TrackViewPoints(course_file)
         return render_template(course_file_path, classes=all_courses.keys(), user= current_user)
     else:
         return redirect(url_for(views.handle_exception))
@@ -61,7 +40,7 @@ def course_file_route(class_name, course, course_file):
 @login_required
 def home():
     try:
-        all_courses = get_courses()
+        all_courses = get_content()
         example = [
             {"name": "Kimia", "class": "Kelas XII MIPA", "image": "chemistry.webp"},
             {"name": "Biologi", "class": "Kelas XI MIPA", "image": "biology.webp"},

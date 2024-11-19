@@ -4,6 +4,7 @@
         main{
             display: flex;
             flex-direction: column;
+            flex-grow: 1;
         }
 
         header {
@@ -182,6 +183,7 @@
 {% endblock %}
 {% block main_content %}
     <main>
+        <!-- Header content -->
         <header>
             <button onclick="toggleSidebar()" class="hamburger toggle-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z"/></svg>
@@ -192,6 +194,8 @@
                 <button><img src="{{ url_for('static', filename='img/dash/pp-icon.svg') }}"></button>
             </div>
         </header>
+
+        <!-- Latest course section -->
         <section class="latest-course">
             <div class="flex-container-1">
                 <img src="{{ url_for('static', filename='img/dash/course-logo.svg') }}">
