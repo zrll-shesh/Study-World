@@ -3,7 +3,7 @@ from urllib.parse import quote
 import os
 from flask_login import current_user
 from functools import wraps
-from random import randint
+from random import randint, choice
 from datetime import datetime, timedelta
 
 def admin_required(f):
@@ -49,10 +49,38 @@ def home():
         return jsonify({"chart_data": chart_data, "box_data": box_data})
     return render_template("admin/home.html", current_url=request.path)
 
-@admin.route('/page-management')
+classes = ["Kelas X MIPA", "Kelas XI MIPA", "Kelas XII MIPA"]
+courses = ["Kimia", "Biologi", "Matematika", "Fisika", "Python"]
+data_content = [{'class': 'Kelas XII MIPA', 'course': 'Fisika', 'module': 'Module 8', 'creator': 'John Doe', 'created_at': '2024-08-11 01:09:46', 'views': 269}, {'class': 'Kelas XI MIPA', 'course': 'Kimia', 'module': 'Module 5', 'creator': 'John Doe', 'created_at': '2024-05-26 01:09:46', 'views': 467}, {'class': 'Kelas X MIPA', 'course': 'Biologi', 'module': 'Module 3', 'creator': 'Jane Roe', 'created_at': '2024-01-20 01:09:46', 'views': 468}, {'class': 'Kelas X MIPA', 'course': 'Python', 'module': 'Module 5', 'creator': 'Jane Roe', 'created_at': '2024-02-17 01:09:46', 'views': 24}, {'class': 'Kelas XI MIPA', 'course': 'Matematika', 'module': 'Module 2', 'creator': 'Bob Johnson', 'created_at': '2024-06-02 01:09:46', 'views': 57}, {'class': 'Kelas XI MIPA', 'course': 'Python', 'module': 'Module 8', 'creator': 'Bob Johnson', 'created_at': '2024-07-10 01:09:46', 'views': 428}, {'class': 'Kelas XII MIPA', 'course': 'Python', 'module': 'Module 10', 'creator': 'Alice Smith', 'created_at': '2024-11-09 01:09:46', 'views': 233}, {'class': 'Kelas XI MIPA', 'course': 'Biologi', 'module': 'Module 4', 'creator': 'Bob Johnson', 'created_at': '2024-05-30 01:09:46', 'views': 151}, {'class': 'Kelas X MIPA', 'course': 'Kimia', 'module': 'Module 9', 'creator': 'Jane Roe', 'created_at': '2024-09-23 01:09:46', 'views': 418}, {'class': 'Kelas XII MIPA', 'course': 'Python', 'module': 'Module 3', 'creator': 'John Doe', 'created_at': '2024-08-11 01:09:46', 'views': 248}, {'class': 'Kelas XI MIPA', 'course': 'Kimia', 'module': 'Module 9', 'creator': 'Jane Roe', 'created_at': '2024-07-05 01:09:46', 'views': 392}, {'class': 'Kelas XI MIPA', 'course': 'Kimia', 'module': 'Module 5', 'creator': 'Alice Smith', 'created_at': '2024-06-09 01:09:46', 'views': 348}, {'class': 'Kelas X MIPA', 'course': 'Python', 'module': 'Module 3', 'creator': 'Bob Johnson', 'created_at': '2024-02-12 01:09:46', 'views': 287}, {'class': 'Kelas X MIPA', 'course': 'Matematika', 'module': 'Module 4', 'creator': 'Bob Johnson', 'created_at': '2024-06-22 01:09:46', 'views': 80}, {'class': 'Kelas XI MIPA', 'course': 'Biologi', 'module': 'Module 6', 'creator': 'Bob Johnson', 'created_at': '2024-10-16 01:09:46', 'views': 399}, {'class': 'Kelas XI MIPA', 'course': 'Matematika', 'module': 'Module 5', 'creator': 'Jane Roe', 'created_at': '2024-07-10 01:09:46', 'views': 61}, {'class': 'Kelas XII MIPA', 'course': 'Kimia', 'module': 'Module 10', 'creator': 'John Doe', 'created_at': '2024-05-17 01:09:46', 'views': 22}, {'class': 'Kelas XII MIPA', 'course': 'Matematika', 'module': 'Module 7', 'creator': 'Bob Johnson', 'created_at': '2024-03-20 01:09:46', 'views': 367}, {'class': 'Kelas XI MIPA', 'course': 'Fisika', 'module': 'Module 2', 'creator': 'John Doe', 'created_at': '2024-03-24 01:09:46', 'views': 111}, {'class': 'Kelas XII MIPA', 'course': 'Python', 'module': 'Module 2', 'creator': 'Alice Smith', 'created_at': '2024-09-04 01:09:46', 'views': 76}]
+
+@admin.route('/page-management', methods=['GET', 'POST'])
 @admin_required
 def pages():
-    return render_template("admin/page-management.html", current_url=request.path)
+    global data_content
+    if request.method == 'POST':
+        data = request.get_json()
+        delete = data.get("delete")
+        if delete:
+            module_to_delete = delete.get("module")
+            if module_to_delete:
+                data_content = [content for content in data_content if content['module'] != module_to_delete]
+        filtered_content = [
+            content for content in data_content
+            if (content['class'] in data.get("classes",[])) and
+               (content['course'] in data.get("courses",[]))
+        ]
+        return render_template("admin/page_update.html", content_data=filtered_content)
+    return render_template("admin/page-management.html", current_url=request.path, classes=classes, courses=courses, content_data=data_content)
+
+@admin.route('/edit/courses/<class_name>/<course>/<course_file>')
+@admin_required
+def edit_module(class_name, course, course_file):
+    return render_template("admin/page_update.html", current_url=request.path)
+
+@admin.route('/add-post')
+@admin_required
+def add_page():
+    
 
 @admin.route('/user-management')
 @admin_required
