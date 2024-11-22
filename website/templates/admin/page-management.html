@@ -15,7 +15,7 @@
             display: flex;
             align-items: center;
             margin-bottom: 5px;
-            padding: 10px;
+            padding: 0 10px;
             border-bottom: #8a8a8a solid 1px;
             gap: 10px;
             position: sticky;
@@ -47,8 +47,6 @@
         }
 
         header .icons {
-            width: auto;
-            height: 100%;
             display: flex;
             align-items: center;
             margin-right: 5px;
@@ -57,19 +55,21 @@
             gap: 20px;
         }
 
-        header .icons button {
+        header button {
             background-color: transparent;
             border: none;
             cursor: pointer;
-            padding: 0;
-            margin: 0;
+            padding: 5px;
             width: auto;
             height: 100%;
+            border-radius: 50%;
+            img {
+                width: 30px;
+                height: 30px;
+            }
         }
-        
-        header .icons button img{
-            width: 40px;
-            height: 40px;
+        header button:hover {
+            background-color: #333333;
         }
         @media (min-width: 768px) {
             .hamburger{
@@ -87,17 +87,34 @@
         align-items: center;
         justify-content: center;
         color: #ffffff;
-        padding: 10px 15px;
+        padding: 10px 5px 10px 15px;
         border-radius: 5px;
         cursor: pointer;
         border: none;
         gap: 8px;
     }
+    .left-button{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    #type-pages{
+        background-color: #333333;
+        font-size: 1rem;
+        padding: 12px 5px 12px 5px;
+        border-radius: 5px;
+        cursor: pointer;
+        border: none;
+        color: #ffffff;
+        outline: none;
+    }
     #filter-btn {
         background-color: #333333;
     }
 
-    #filter-btn:hover {
+    #filter-btn:hover,
+    #type-pages:hover {
         background-color: #555555;
     }
     .click{
@@ -135,7 +152,6 @@
         background: #333333;
         padding: 20px 20px;
         border-radius: 5px;
-        width: 100%;
         z-index: 1;
     }
     .hidden{
@@ -146,7 +162,6 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
-    height: 100%;
     padding: 20px;
     }
 
@@ -241,15 +256,22 @@
         </div>
     </header>
     <div class="buttons">
-        <button id="filter-btn">
-            <p>Filter</p>
-            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M480-344 240-584l56-56 184 184 184-184 56 56-240 240Z"/></svg>
-        </button>
-        <button id="create-btn">
+        <div class="left-button">
+            <select id="type-pages">
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+            </select>
+            <button id="filter-btn">
+                <p>Filter</p>
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M480-344 240-584l56-56 184 184 184-184 56 56-240 240Z"/></svg>
+            </button>
+        </div>
+        <button id="create-btn" onclick="window.location.href='{{url_for('admin.add_page')}}'">
             <p>Create</p>
             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
         </button>
     </div>
+    <div id="update-content">
         <div id="filter-box" class="hidden">
             <ul id="classes">
                 <p>Classes :</p>
@@ -258,18 +280,18 @@
                     <input type="checkbox" id="class_{{ loop.index }}" />
                     <label for="class_{{ loop.index }}">{{ class }}</label>
                 </li>
-                {% endfor %}
-            </ul>
-            <ul id="courses">
-                <p>Courses :</p>
-                {% for course in courses %}
-                <li>
-                    <input type="checkbox" id="course_{{ loop.index }}" />
-                    <label for="course_{{ loop.index }}">{{ course }}</label>
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
+            {% endfor %}
+        </ul>
+        <ul id="courses">
+            <p>Courses :</p>
+            {% for course in courses %}
+            <li>
+                <input type="checkbox" id="course_{{ loop.index }}" />
+                <label for="course_{{ loop.index }}">{{ course }}</label>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
     <div id="content-container">
         {% if content_data %}
             {% for content in content_data %}
@@ -293,7 +315,8 @@
                         <button onclick="remove_content(this)"
                                 data-class="{{ content.class }}"
                                 data-course="{{ content.course }}"
-                                data-module="{{ content.module }}">
+                                data-module="{{ content.module }}"
+                                id-module = "{{ content.id}}">
                             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
                         </button>
                     </div>
@@ -306,15 +329,20 @@
         {% else %}
         <p>No content found.</p>
         {% endif %}
+    </div>
     
 </main>
 {% endblock %}
 {% block extra_script %}
 <script>
+    let selectedValue = "published";
     let delete_content = null;
-
+    const type_select = document.getElementById('type-pages');
+    type_select.addEventListener("change",() =>{
+        selectedValue = type_select.value;
+        send_data()
+    })
     const checkboxes = document.querySelectorAll("input[type='checkbox']");
-    
     checkboxes.forEach((checkbox) =>{
             checkbox.checked = true;
     });
@@ -322,12 +350,9 @@
         let classe = button.getAttribute('data-class');
         let course = button.getAttribute('data-course');
         let modul = button.getAttribute('data-module');
+        let id_module = button.getAttribute('id-module')
         if(confirm(`Are you sure you want to remove the content for module ${modul}, class ${classe}, course ${course}?`)){
-            delete_content = {
-                'class': classe,
-                'course': course,
-                'module': modul,
-            }
+            delete_content = id_module
             send_data()
         }
     }
@@ -344,9 +369,9 @@
     });
     
     function send_data(){
-        let data = {};
+        let data = {[selectedValue] : {}};
         if (delete_content){
-            data['delete'] = delete_content
+            data[selectedValue]['delete'] = delete_content
         }
         const filter_check = document.getElementById('filter-box')
         filter_check.querySelectorAll("ul").forEach(ul => {
@@ -356,10 +381,10 @@
                     const category = label.textContent.trim();
                     const checkbox = li.querySelector('input[type="checkbox"]');
                     if (checkbox && checkbox.checked) {
-                        if (!data[ul.id]) {
-                            data[ul.id] = [];
+                        if (!data[selectedValue][ul.id]) {
+                            data[selectedValue][ul.id] = [];
                         }
-                        data[ul.id].push(category);
+                        data[selectedValue][ul.id].push(category);
                     };
                 };
             });
@@ -372,7 +397,7 @@
             body: JSON.stringify(data),
         }).then(Response => Response.text())
         .then(html => {
-            document.getElementById('content-container').outerHTML = html;
+            document.getElementById('update-content').outerHTML = html;
         })
     }
 </script>

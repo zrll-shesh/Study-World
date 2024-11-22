@@ -1,10 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
-from urllib.parse import quote
-import os
+from .models import get_tempcontent, content_dash, pages_information, delete_page, update_publish
 from flask_login import current_user
 from functools import wraps
-from random import randint, choice
-from datetime import datetime, timedelta
 
 def admin_required(f):
     @wraps(f)
@@ -17,70 +14,90 @@ def admin_required(f):
 
 admin = Blueprint('admin', __name__)
 
-def generate_test_data(x, views=None):
-    today = datetime.now()
-    data = []
-    for i in range(x):  # Last 7 days
-        date = (today - timedelta(days=i)).strftime('%Y-%m-%d')
-        line = randint(50, 500)  # Random views between 50 and 500
-        if views:
-            data.append({'date': date, 'views': line})
-        else:
-            data.append({'date': date, 'user': line})
-    return data[::-1]  # Reverse to have the oldest date first
-
-
 @admin.route('/home', methods=['GET','POST'])
 @admin_required
 def home():
     if request.method == 'POST':
         data = request.get_json()
+        new_user, total_user, total_content, total_views, new_user_every_day, views_every_day = content_dash(data.get('date'))
         chart_data = {}
         if data.get('graph')['user']:
-            chart_data['user'] = generate_test_data(data.get('date'))
+            chart_data['user'] = new_user_every_day
         if data.get('graph')['views']:
-            chart_data['views'] = generate_test_data(data.get('date'), True)
+            chart_data['views'] = views_every_day
         box_data = [
-            randint(1,100),
-            randint(1,10000),
-            randint(1,100),
-            randint(1,10000)
+            new_user,
+            total_user,
+            total_content,
+            total_views
         ]
         return jsonify({"chart_data": chart_data, "box_data": box_data})
     return render_template("admin/home.html", current_url=request.path)
 
-classes = ["Kelas X MIPA", "Kelas XI MIPA", "Kelas XII MIPA"]
-courses = ["Kimia", "Biologi", "Matematika", "Fisika", "Python"]
-data_content = [{'class': 'Kelas XII MIPA', 'course': 'Fisika', 'module': 'Module 8', 'creator': 'John Doe', 'created_at': '2024-08-11 01:09:46', 'views': 269}, {'class': 'Kelas XI MIPA', 'course': 'Kimia', 'module': 'Module 5', 'creator': 'John Doe', 'created_at': '2024-05-26 01:09:46', 'views': 467}, {'class': 'Kelas X MIPA', 'course': 'Biologi', 'module': 'Module 3', 'creator': 'Jane Roe', 'created_at': '2024-01-20 01:09:46', 'views': 468}, {'class': 'Kelas X MIPA', 'course': 'Python', 'module': 'Module 5', 'creator': 'Jane Roe', 'created_at': '2024-02-17 01:09:46', 'views': 24}, {'class': 'Kelas XI MIPA', 'course': 'Matematika', 'module': 'Module 2', 'creator': 'Bob Johnson', 'created_at': '2024-06-02 01:09:46', 'views': 57}, {'class': 'Kelas XI MIPA', 'course': 'Python', 'module': 'Module 8', 'creator': 'Bob Johnson', 'created_at': '2024-07-10 01:09:46', 'views': 428}, {'class': 'Kelas XII MIPA', 'course': 'Python', 'module': 'Module 10', 'creator': 'Alice Smith', 'created_at': '2024-11-09 01:09:46', 'views': 233}, {'class': 'Kelas XI MIPA', 'course': 'Biologi', 'module': 'Module 4', 'creator': 'Bob Johnson', 'created_at': '2024-05-30 01:09:46', 'views': 151}, {'class': 'Kelas X MIPA', 'course': 'Kimia', 'module': 'Module 9', 'creator': 'Jane Roe', 'created_at': '2024-09-23 01:09:46', 'views': 418}, {'class': 'Kelas XII MIPA', 'course': 'Python', 'module': 'Module 3', 'creator': 'John Doe', 'created_at': '2024-08-11 01:09:46', 'views': 248}, {'class': 'Kelas XI MIPA', 'course': 'Kimia', 'module': 'Module 9', 'creator': 'Jane Roe', 'created_at': '2024-07-05 01:09:46', 'views': 392}, {'class': 'Kelas XI MIPA', 'course': 'Kimia', 'module': 'Module 5', 'creator': 'Alice Smith', 'created_at': '2024-06-09 01:09:46', 'views': 348}, {'class': 'Kelas X MIPA', 'course': 'Python', 'module': 'Module 3', 'creator': 'Bob Johnson', 'created_at': '2024-02-12 01:09:46', 'views': 287}, {'class': 'Kelas X MIPA', 'course': 'Matematika', 'module': 'Module 4', 'creator': 'Bob Johnson', 'created_at': '2024-06-22 01:09:46', 'views': 80}, {'class': 'Kelas XI MIPA', 'course': 'Biologi', 'module': 'Module 6', 'creator': 'Bob Johnson', 'created_at': '2024-10-16 01:09:46', 'views': 399}, {'class': 'Kelas XI MIPA', 'course': 'Matematika', 'module': 'Module 5', 'creator': 'Jane Roe', 'created_at': '2024-07-10 01:09:46', 'views': 61}, {'class': 'Kelas XII MIPA', 'course': 'Kimia', 'module': 'Module 10', 'creator': 'John Doe', 'created_at': '2024-05-17 01:09:46', 'views': 22}, {'class': 'Kelas XII MIPA', 'course': 'Matematika', 'module': 'Module 7', 'creator': 'Bob Johnson', 'created_at': '2024-03-20 01:09:46', 'views': 367}, {'class': 'Kelas XI MIPA', 'course': 'Fisika', 'module': 'Module 2', 'creator': 'John Doe', 'created_at': '2024-03-24 01:09:46', 'views': 111}, {'class': 'Kelas XII MIPA', 'course': 'Python', 'module': 'Module 2', 'creator': 'Alice Smith', 'created_at': '2024-09-04 01:09:46', 'views': 76}]
-
 @admin.route('/page-management', methods=['GET', 'POST'])
 @admin_required
 def pages():
-    global data_content
+    data_content, classes, courses = pages_information()
     if request.method == 'POST':
         data = request.get_json()
-        delete = data.get("delete")
-        if delete:
-            module_to_delete = delete.get("module")
-            if module_to_delete:
-                data_content = [content for content in data_content if content['module'] != module_to_delete]
+        selectedValue = list(data.keys())[0]
+        delete_id = data[selectedValue].get("delete")
+        if selectedValue == 'draft':
+            if delete_id:
+                delete_page(delete_id, is_draft=True)
+            data_content, classes,courses = pages_information(is_draft=True)
+        else:
+            if delete_id:
+                delete_page(delete_id)
+            data_content, classes, courses = pages_information()
         filtered_content = [
             content for content in data_content
             if (content['class'] in data.get("classes",[])) and
                (content['course'] in data.get("courses",[]))
         ]
-        return render_template("admin/page_update.html", content_data=filtered_content)
+        return render_template("admin/page_update.html", classes=classes, courses=courses, content_data=filtered_content)
     return render_template("admin/page-management.html", current_url=request.path, classes=classes, courses=courses, content_data=data_content)
-
-@admin.route('/edit/courses/<class_name>/<course>/<course_file>')
-@admin_required
-def edit_module(class_name, course, course_file):
-    return render_template("admin/page_update.html", current_url=request.path)
 
 @admin.route('/add-post')
 @admin_required
 def add_page():
-    
+    with open("website/templates/admin/template.html") as f:
+        content = f.read()
+    temp_id = get_tempcontent(html=content).id
+    return redirect(url_for('admin.edit_module', tempcontent_id=temp_id))
+
+@admin.route('/edit/<int:tempcontent_id>')
+@admin.route('/edit/courses/<class_name>/<course>/<course_file>')
+@admin_required
+def edit_module(tempcontant_id = None, class_name = None, course = None, course_file=None):
+    if class_name and course and course_file:
+        print('asu')
+        temp_content = get_tempcontent(list_path=[class_name, course, course_file])
+        return redirect(url_for('admin.edit_module', tempcontent_id=temp_content.id))
+    data = get_tempcontent(tempcontant_id)
+    return render_template("admin/add_update.html", current_url=request.path, data=data)
+
+@admin.route('/save', methods=['POST'])
+@admin_required
+def save_content():
+    data = request.get_json()
+    id_tempcontent = data.get("id")
+    classe = data.get("class")
+    course = data.get("course")
+    module = data.get("module")
+    html = data.get("html")
+    if data.get("publish"):
+        publish = True
+    else:
+        publish = False
+    update_publish(id_tempcontent=id_tempcontent, classe=classe, course=course, module=module, html=html, is_published=publish)
+    return jsonify({"success": True})
+
+@admin.route('/preview/<int:tempcontent_id>')
+@admin_required
+def preview(tempcontent_id):
+    data = get_tempcontent(tempcontent_id)
+    return render_template(data.generated_html)
 
 @admin.route('/user-management')
 @admin_required

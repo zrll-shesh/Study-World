@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Create</title>
+		<link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/43.3.1/ckeditor5.css">
+		<style>
+            :root {
+            /* Overrides the border radius setting in the theme. */
+            --ck-border-radius: 4px;
+
+            /* Overrides the default font size in the theme. */
+            --ck-font-size-base: 14px;
+
+            /* Helper variables to avoid duplication in the colors. */
+            --ck-custom-background: hsl(270, 1%, 29%);
+            --ck-custom-foreground: hsl(255, 3%, 18%);
+            --ck-custom-border: hsl(300, 1%, 22%);
+            --ck-custom-white: hsl(0, 0%, 100%);
+
+            /* -- Overrides generic colors. ------------------------------------------------------------- */
+
+            --ck-color-base-foreground: var(--ck-custom-background);
+            --ck-color-focus-border: hsl(208, 90%, 62%);
+            --ck-color-text: hsl(0, 0%, 98%);
+            --ck-color-shadow-drop: hsla(0, 0%, 0%, 0.2);
+            --ck-color-shadow-inner: hsla(0, 0%, 0%, 0.1);
+
+            /* -- Overrides the default .ck-button class colors. ---------------------------------------- */
+
+            --ck-color-button-default-background: var(--ck-custom-background);
+            --ck-color-button-default-hover-background: hsl(270, 1%, 22%);
+            --ck-color-button-default-active-background: hsl(270, 2%, 20%);
+            --ck-color-button-default-active-shadow: hsl(270, 2%, 23%);
+            --ck-color-button-default-disabled-background: var(--ck-custom-background);
+
+            --ck-color-button-on-background: var(--ck-custom-foreground);
+            --ck-color-button-on-hover-background: hsl(255, 4%, 16%);
+            --ck-color-button-on-active-background: hsl(255, 4%, 14%);
+            --ck-color-button-on-active-shadow: hsl(240, 3%, 19%);
+            --ck-color-button-on-disabled-background: var(--ck-custom-foreground);
+
+            --ck-color-button-action-background: hsl(168, 76%, 42%);
+            --ck-color-button-action-hover-background: hsl(168, 76%, 38%);
+            --ck-color-button-action-active-background: hsl(168, 76%, 36%);
+            --ck-color-button-action-active-shadow: hsl(168, 75%, 34%);
+            --ck-color-button-action-disabled-background: hsl(168, 76%, 42%);
+            --ck-color-button-action-text: var(--ck-custom-white);
+
+            --ck-color-button-save: hsl(120, 100%, 46%);
+            --ck-color-button-cancel: hsl(15, 100%, 56%);
+
+            /* -- Overrides the default .ck-dropdown class colors. -------------------------------------- */
+
+            --ck-color-dropdown-panel-background: var(--ck-custom-background);
+            --ck-color-dropdown-panel-border: var(--ck-custom-foreground);
+
+            /* -- Overrides the default .ck-dialog class colors. ----------------------------------- */
+
+            --ck-color-dialog-background: var(--ck-custom-background);
+            --ck-color-dialog-form-header-border: var(--ck-custom-border);
+
+            /* -- Overrides the default .ck-splitbutton class colors. ----------------------------------- */
+
+            --ck-color-split-button-hover-background: var(--ck-color-button-default-hover-background);
+            --ck-color-split-button-hover-border: var(--ck-custom-foreground);
+
+            /* -- Overrides the default .ck-input class colors. ----------------------------------------- */
+
+            --ck-color-input-background: var(--ck-custom-background);
+            --ck-color-input-border: hsl(257, 3%, 43%);
+            --ck-color-input-text: hsl(0, 0%, 98%);
+            --ck-color-input-disabled-background: hsl(255, 4%, 21%);
+            --ck-color-input-disabled-border: hsl(250, 3%, 38%);
+            --ck-color-input-disabled-text: hsl(0, 0%, 78%);
+
+            /* -- Overrides the default .ck-labeled-field-view class colors. ---------------------------- */
+
+            --ck-color-labeled-field-label-background: var(--ck-custom-background);
+
+            /* -- Overrides the default .ck-list class colors. ------------------------------------------ */
+
+            --ck-color-list-background: var(--ck-custom-background);
+            --ck-color-list-button-hover-background: var(--ck-color-base-foreground);
+            --ck-color-list-button-on-background: var(--ck-color-base-active);
+            --ck-color-list-button-on-background-focus: var(--ck-color-base-active-focus);
+            --ck-color-list-button-on-text: var(--ck-color-base-background);
+
+            /* -- Overrides the default .ck-balloon-panel class colors. --------------------------------- */
+
+            --ck-color-panel-background: var(--ck-custom-background);
+            --ck-color-panel-border: var(--ck-custom-border);
+
+            /* -- Overrides the default .ck-toolbar class colors. --------------------------------------- */
+
+            --ck-color-toolbar-background: var(--ck-custom-background);
+            --ck-color-toolbar-border: var(--ck-custom-border);
+
+            /* -- Overrides the default .ck-tooltip class colors. --------------------------------------- */
+
+            --ck-color-tooltip-background: hsl(252, 7%, 14%);
+            --ck-color-tooltip-text: hsl(0, 0%, 93%);
+
+            /* -- Overrides the default colors used by the ckeditor5-image package. --------------------- */
+
+            --ck-color-image-caption-background: hsl(0, 0%, 97%);
+            --ck-color-image-caption-text: hsl(0, 0%, 20%);
+
+            /* -- Overrides the default colors used by the ckeditor5-widget package. -------------------- */
+
+            --ck-color-widget-blurred-border: hsl(0, 0%, 87%);
+            --ck-color-widget-hover-border: hsl(43, 100%, 68%);
+            --ck-color-widget-editable-focus-background: var(--ck-custom-white);
+
+            /* -- Overrides the default colors used by the ckeditor5-link package. ---------------------- */
+
+            --ck-color-link-default: hsl(190, 100%, 75%);
+        }
+        header{
+            display: flex;
+            justify-content: space-between;
+            width: 100vw;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .main-container {
+            width: 795px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .hidden{
+            display: none;
+        }
+		</style>
+	</head>
+	<body>
+        <header>
+            <button id="back-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/></svg>
+                <p>Back</p>
+            </button>
+            <input type="text" id="module-name" class="post-info" placeholder="Module Name" value="{{data.module}}">
+            <div id="save">
+                <svg id="saved" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M260-160q-91 0-155.5-63T40-377q0-78 47-139t123-78q25-92 100-149t170-57q117 0 198.5 81.5T760-520q69 8 114.5 59.5T920-340q0 75-52.5 127.5T740-160H260Zm0-80h480q42 0 71-29t29-71q0-42-29-71t-71-29h-60v-80q0-83-58.5-141.5T480-720q-83 0-141.5 58.5T280-520h-20q-58 0-99 41t-41 99q0 58 41 99t99 41Zm220-240Z"/></svg>
+                <svg id="unsaved" class="hidden" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M792-56 686-160H260q-92 0-156-64T40-380q0-77 47.5-137T210-594q3-8 6-15.5t6-16.5L56-792l56-56 736 736-56 56ZM260-240h346L284-562q-2 11-3 21t-1 21h-20q-58 0-99 41t-41 99q0 58 41 99t99 41Zm185-161Zm419 191-58-56q17-14 25.5-32.5T840-340q0-42-29-71t-71-29h-60v-80q0-83-58.5-141.5T480-720q-27 0-52 6.5T380-693l-58-58q35-24 74.5-36.5T480-800q117 0 198.5 81.5T760-520q69 8 114.5 59.5T920-340q0 39-15 72.5T864-210ZM593-479Z"/></svg>
+            </div>
+            <button id="preview-btn" onclick="window.open('{{ url_for('admin.preview', tempcontent_id=data.id) }}', '_blank')">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z"/></svg>
+                <p>Preview</p>
+            </button>
+            <button id="publish-btn" onclick="publish()">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z"/></svg>
+                <p>Publish</p>
+            </button>
+        </header>
+        <div class="content">
+            <div class="main-container">
+                <div id="editor">{% if data.generated_html %}{{ data.generated_html | safe }}{% endif %}</div>
+            </div>
+            <div class="side-bar">
+                <input type="text" id="class-name" class="post-info" placeholder="Class Name" value="{{data.Class}}">
+                <input type="text" id="course-name" class="post-info" placeholder="Course Name" value="{{data.Course}}">
+            </div>
+        </div>
+
+        <!-- script in here -->
+        <script type="importmap">
+            {
+                "imports": {
+                    "ckeditor5": "https://cdn.ckeditor.com/ckeditor5/43.3.1/ckeditor5.js",
+                    "ckeditor5/": "https://cdn.ckeditor.com/ckeditor5/43.3.1/"
+                }
+            }
+        </script>
+		<script>
+            // ckeditor script
+			import {
+                SourceEditing,
+				ClassicEditor,
+				Essentials,
+				Paragraph,
+				Bold,
+				Italic,
+				Font,
+                Image,
+                ImageCaption,
+                ImageResize,
+                ImageStyle,
+                ImageToolbar,
+                ImageUpload,
+                LinkImage,
+                Base64UploadAdapter,
+                Link,
+                List,
+                MediaEmbed,
+                Table,
+                TableColumnResize,
+                TableToolbar,
+                Underline,
+                Heading,
+			} from 'ckeditor5';
+			ClassicEditor
+				.create( document.querySelector( '#editor' ), {
+					plugins: [
+                    SourceEditing,
+                    ClassicEditor,
+                    Essentials,
+                    Paragraph,
+                    Bold,
+                    Italic,
+                    Font,
+                    Image,
+                    ImageCaption,
+                    ImageResize,
+                    ImageStyle,
+                    ImageToolbar,
+                    ImageUpload,
+                    Base64UploadAdapter,
+                    LinkImage,
+                    Link,
+                    List,
+                    MediaEmbed,
+                    Table,
+                    TableColumnResize,
+                    TableToolbar,
+                    Underline,
+                    Heading,
+                    ],
+					toolbar: [
+                        'sourceEditing','|',
+						'undo', 'redo', '|',
+                        'heading','|',
+                        'bold', 'italic', 'underline', '|',
+						'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', '|',
+                        'bulletedList', 'numberedList', ,'|',
+                        'link','insertImage', 'insertTable', '|',
+                        'mediaEmbed',
+					],
+                    image: {
+                    toolbar: ['imageTextAlternative', 'imageStyle:inline', 'imageStyle:block', 'imageStyle:side']
+                },
+				} )
+				.then( editor => {
+					window.editor = editor;
+				} )
+				.catch( error => {
+					console.error( error );
+				} );
+        </script>
+        <script>
+            // the page script
+            let typingTimer;
+            const typingDelay = 500;
+            let content = {'id': {{data.id}} };
+            const save = document.getElementById('save');
+            const unsaved = document.getElementById('unsaved');
+
+            //get the content from input every time user stop typing
+            const post_infos = document.querySelectorAll(".post_info");
+            post_infos.forEach(info =>{
+                info.addEventListener("input", ()=>{
+                    clearTimeout(typingTimer) //reset the timer when user typing
+                    typingTimer = setTimeout(()=>{
+                        content[info.id] = info.value;
+                        unsaved.classList.remove('hidden');
+                        save.classList.add('hidden');
+                    });
+                })
+            });
+
+            //get the content from ckeditor every time user stop typing
+            editor.model.document.on('change:data', () => {
+                clearTimeout(typingTimer) //reset the timer when user typing
+                typingTimer = setTimeout(()=>{
+                    content['generated_html'] = editor.getData();
+                    unsaved.classList.remove('hidden');
+                    save.classList.add('hidden');
+                });
+            });
+
+            //function to save the content
+            function  save_content(){
+               fetch("{{ url_for('admin.save_content') }}", {
+                   method: "POST",
+                   headers: {
+                       "Content-Type": "application/json",
+                   },
+                   body: JSON.stringify(content), 
+               }).then(Response => Response.ok).then(() => {
+                   unsaved.classList.add('hidden');
+                   save.classList.remove('hidden');
+               });
+            }
+
+            //function to publish the content
+            function publish(){
+                if(confirm("Are you sure you want to publish this content?")){
+                    content["publish"] = true;
+                    save_content();
+                }
+            }
+		</script>
+	</body>
+</html>

@@ -8,6 +8,8 @@ from flask_login import LoginManager
 db = SQLAlchemy()
 DB_NAME = "database.db"
 mail = Mail()
+login_manager = LoginManager()
+login_manager.login_view = 'auth.auth_page'
 load_dotenv('website/.env')
 def create_app():
     app = Flask(__name__)
@@ -20,8 +22,6 @@ def create_app():
     app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
     app.config['MAIL_PASSWORD'] =  os.getenv('MAIL_PASSWORD')
     app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')
-    login_manager = LoginManager()
-    login_manager.login_view = 'auth.auth_page'
 
     from .views import views
     from .auth import auth
@@ -30,7 +30,6 @@ def create_app():
     db.init_app(app)
     mail.init_app(app)
     login_manager.init_app(app)
-
 
     app.register_blueprint(views, url_prefix='/')
     app.register_blueprint(auth, url_prefix='/')

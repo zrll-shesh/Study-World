@@ -1,3 +1,24 @@
+<div id="update-content">
+    <div id="filter-box" class="hidden">
+        <ul id="classes">
+            <p>Classes :</p>
+            {% for class in classes %}
+            <li>
+                <input type="checkbox" id="class_{{ loop.index }}" />
+                <label for="class_{{ loop.index }}">{{ class }}</label>
+            </li>
+        {% endfor %}
+    </ul>
+    <ul id="courses">
+        <p>Courses :</p>
+        {% for course in courses %}
+        <li>
+            <input type="checkbox" id="course_{{ loop.index }}" />
+            <label for="course_{{ loop.index }}">{{ course }}</label>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
 <div id="content-container">
     {% if content_data %}
         {% for content in content_data %}
@@ -21,7 +42,8 @@
                     <button onclick="remove_content(this)"
                             data-class="{{ content.class }}"
                             data-course="{{ content.course }}"
-                            data-module="{{ content.module }}">
+                            data-module="{{ content.module }}"
+                            id-module = "{{ content.id}}">
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
                     </button>
                 </div>
@@ -34,3 +56,4 @@
     {% else %}
     <p>No content found.</p>
     {% endif %}
+</div>
