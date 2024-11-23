@@ -42,10 +42,12 @@ class TempContent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     Class = db.Column(db.String(150), index=True)
     Course = db.Column(db.String(150), index=True)
-    module = db.Column(db.String(150), index=True)
+    Module = db.Column(db.String(150), index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     generated_html = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=db.func.now())
+    Visit_point = db.Column(db.Integer, default=0)
+    Finish_point = db.Column(db.Integer, default=0)
+    Created_at = db.Column(db.DateTime, default=db.func.now())
 
 def TrackViewPoints(page):
     #track all point and view for each module
@@ -76,19 +78,18 @@ def TrackFinishPoints(page):
     data.user_point += point
     db.session.commit()
 
-def get_content():
-    # get all content to show in courses    
-    all_content = Content.query.all()
+def get_content(is_latest=False):
+    # get all content to show in courses   
+    if is_latest:
+        latest_content = Content.query.order_by(Content.Created_at.desc()).limit(5).all()
+        return latest_content
+    all_content = Content.query.with_entities(
+        Content.Class, Content.Course, Content.Module, Content.Created_at, Content.img_path
+    ).order_by(Content.Class, Content.Course, Content.Created_at).all()
     result = defaultdict(lambda: defaultdict(list))
     for content in all_content:
-        result[content.Class][content.Course].append(content)
-    for class_name, courses in result.items():
-        for course, content_list in courses.items():
-            # sort content from the oldest to newest
-            content_list.sort(key=lambda x: x.Created_at)
-    return {class_name: {course_name: [content.Module for content in content_list] 
-            for course_name, content_list in courses.items()} 
-            for class_name, courses in result.items()}
+        result[content.Class][content.Course].append((content.Module, content.img_path))
+    return dict(result)
 
 def content_dash(range_date):
     # get information for admin dashboard
@@ -117,11 +118,11 @@ def content_dash(range_date):
     new_user_every_day = [{'date' : str(u[0]), 'user' : u[1]} for u in user_data]
     return new_user, total_user, total_content, total_views, new_user_every_day, views_every_day
 
-def pages_information(is_draft=None):
+def pages_information(is_draft=False):
     if is_draft:
         unique_classes = db.session.query(TempContent.Class).distinct().all()
         unique_courses = db.session.query(TempContent.Course).distinct().all()
-        all_content = TempContent.query.order_by(TempContent.created_at.desc()).all()
+        all_content = TempContent.query.order_by(TempContent.Created_at.desc()).all()
     else:
         unique_classes = db.session.query(Content.Class).distinct().all()
         unique_courses = db.session.query(Content.Course).distinct().all()
@@ -136,17 +137,19 @@ def pages_information(is_draft=None):
             'class': content.Class,
              'course': content.Course,
              'module': content.Module,
-             'creator': content.Creator,
+             'creator': getattr(content, 'Creator', None),
              'created_at': format_datetime(content.Created_at),
-            'views':content.Views}
+            'views': getattr(content, 'Views', None)}
     for content in all_content]
     return data_contents, classes, courses
 
-def delete_page(id_content, is_draft=None):
+def delete_page(id_content, is_draft=False):
     if is_draft:
         page = TempContent.query.filter_by(id=id_content).first()
     else:
         page = Content.query.filter_by(id=id_content).first()
+        path_file = os.path.join(os.getcwd(), 'website/static/courses', page.Class, page.Course, page.Module,'.html')
+        os.remove(path=path_file)
     if page:
         db.session.delete(page)
         db.session.commit()
@@ -163,9 +166,11 @@ def save_images_and_get_updated_html(html_content, class_name,course_name, modul
             
             # Generate a filename for the image
             image_filename = f"{module_name} img{idx+1}.{img_type}"
+            if idx == 0:
+                img_path = image_filename
             
             # Determine the directory for storing the image file
-            directory = os.path.join('website/static/courses', class_name, course_name)
+            directory = os.path.join(os.getcwd(),'website/static/img/courses', class_name, course_name)
             if not os.path.exists(directory):
                 os.makedirs(directory)
             
@@ -174,43 +179,44 @@ def save_images_and_get_updated_html(html_content, class_name,course_name, modul
             # Save the base64 image to the file
             with open(image_path, 'wb') as f:
                 f.write(base64.b64decode(img_data))
-            if idx == 0:
-                img_path = image_path
             # Update the image src in the HTML to the relative file path
             image['src'] = url_for('uploaded_file', filename=os.path.join(course_name, class_name, image_filename))
     return str(soup), img_path
     
 def save_html(html_content, class_name, course_name, module_name):
-    directory = os.path.join('website/static/courses', class_name, course_name)
+    directory = os.path.join('website/static/courses', class_name, course_name,'.html')
     if not os.path.exists(directory):
         os.makedirs(directory)
     file_path = os.path.join(directory, module_name)
     with open(file_path, 'w', encoding='utf-8') as file:
         file.write(html_content)
 
-def update_publish(id_tempcontent,classe=None, course=None, module=None, html=None, is_published=None):
+def update_publish(id_tempcontent,classe=None, course=None, module=None, html=None, is_published=None, Visit_point=None, Finish_point=None):
     if id_tempcontent and not is_published:
-        temp_content = TempContent(module=module, Class=classe, Course=course, generated_html=html)
-        db.session.add(temp_content)
+        temp_content = TempContent.query.filter_by(id=id_tempcontent).first()
+        temp_content.Class = classe
+        temp_content.Course = course
+        temp_content.Module = module
+        temp_content.generated_html = html
+        temp_content.Visit_point = Visit_point
+        temp_content.Finish_point = Finish_point
     if id_tempcontent and is_published:
         temp_content = TempContent.query.filter_by(id=id_tempcontent).first()
         html_with_img, img_path = save_images_and_get_updated_html(temp_content.generated_html, classe, course, module)
         save_html(html_with_img, classe, course, module)
-        content = Content(Module=module, Class=classe, Course=course)
+        content = Content(Module=module, Class=classe, Course=course, Visit_point=Visit_point, Finish_point=Finish_point, img_path=img_path)
         db.session.add(content)
         db.session.delete(temp_content)
-        db.session.commit()
+    db.session.commit()
 
-def get_tempcontent(id_tempcontent=None, all_items=False, list_path=None, html=None):
-    if all_items:
-        return TempContent.query.filter_by(user_id=current_user.get_id()).order_by(TempContent.created_at.desc()).all()
+def get_tempcontent(id_tempcontent=None, list_path=None, html=None):
     if id_tempcontent:
         return TempContent.query.filter_by(id=id_tempcontent).first()
     else:
         if list_path:
-            temp_content = TempContent.query.filter_by(Class=list_path[0], Course=list_path[1], module=list_path[2]).first()
+            temp_content = TempContent.query.filter_by(Class=list_path[0], Course=list_path[1], Module=list_path[2]).first()
         else:
-            temp_content = TempContent(Class=None, Course=None, module=None, generated_html=html, user_id=current_user.get_id())
+            temp_content = TempContent(Class=None, Course=None, Module=None, generated_html=html, user_id=current_user.get_id())
             db.session.add(temp_content)
             db.session.commit()
         return temp_content

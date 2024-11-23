@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8">
+    <head>
+        <meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>Create</title>
 		<link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/43.3.1/ckeditor5.css">
 		<style>
+            @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
             :root {
             /* Overrides the border radius setting in the theme. */
             --ck-border-radius: 4px;
@@ -117,19 +118,118 @@
 
             --ck-color-link-default: hsl(190, 100%, 75%);
         }
+        :root{
+            --base-clr: #11121a;
+            --line-clr: #42434a;
+            --hover-clr: #222533;
+            --text-clr: #e6e6ef;
+            --accent-clr: #5e63ff;
+            --secondary-text-clr: #b0b3c1;
+        }
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            min-height: 100vh;
+            max-width: 100vw;
+            background-color:  var(--base-clr);
+            display: flex;
+            flex-direction: column;
+            font-family: Poppins, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
         header{
+            background-color: #272927;
+            border-bottom: 1px solid var(--text-clr);
+        }
+        .header{
             display: flex;
             justify-content: space-between;
-            width: 100vw;
-            margin-left: auto;
-            margin-right: auto;
+            height: 7vh;
+            gap: 10px;
+            align-items: center;
+            height: 10vh;
+            gap: 10px;
+            padding: 0 10px;
+            margin: 10px 5px;
+        }
+        input{
+            background-color: var(--base-clr);
+            border: 1px solid var(--line-clr);
+            border-radius: 5px;
+            height: 70%;
+            color: var(--text-clr);
+            padding: 5px 10px;
+            flex-grow: 1;
+            outline: none;
+        }
+        input:focus{
+            background-color: #222533;
+            border: 1px solid var(--text-clr);
         }
 
-        .main-container {
-            width: 795px;
-            margin-left: auto;
-            margin-right: auto;
+        .content {
+            width: 100vw;
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
         }
+
+        .main-container{
+            width: 100%;
+            margin-top: 10px;
+            padding-left: 10px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .side-bar{
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 15px 20px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background-color: #272927;
+            color: var(--text-clr);
+            border-left: var(--text-clr) solid 1px;
+        }
+
+        .right-btn{
+            display: flex;
+            gap: 10px;
+            button{
+                background-color: #ff1616;
+            }
+        }
+        button{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 3px;
+            background-color: #42434a;
+            color: var(--text-clr);
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .info-container{
+            margin: 10px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            color: var(--text-clr);
+            p{
+                font-size: 0.8rem;
+                font-weight: 450;
+            }
+        }
+
         .hidden{
             display: none;
         }
@@ -137,46 +237,61 @@
 	</head>
 	<body>
         <header>
-            <button id="back-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/></svg>
-                <p>Back</p>
-            </button>
-            <input type="text" id="module-name" class="post-info" placeholder="Module Name" value="{{data.module}}">
-            <div id="save">
-                <svg id="saved" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M260-160q-91 0-155.5-63T40-377q0-78 47-139t123-78q25-92 100-149t170-57q117 0 198.5 81.5T760-520q69 8 114.5 59.5T920-340q0 75-52.5 127.5T740-160H260Zm0-80h480q42 0 71-29t29-71q0-42-29-71t-71-29h-60v-80q0-83-58.5-141.5T480-720q-83 0-141.5 58.5T280-520h-20q-58 0-99 41t-41 99q0 58 41 99t99 41Zm220-240Z"/></svg>
-                <svg id="unsaved" class="hidden" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M792-56 686-160H260q-92 0-156-64T40-380q0-77 47.5-137T210-594q3-8 6-15.5t6-16.5L56-792l56-56 736 736-56 56ZM260-240h346L284-562q-2 11-3 21t-1 21h-20q-58 0-99 41t-41 99q0 58 41 99t99 41Zm185-161Zm419 191-58-56q17-14 25.5-32.5T840-340q0-42-29-71t-71-29h-60v-80q0-83-58.5-141.5T480-720q-27 0-52 6.5T380-693l-58-58q35-24 74.5-36.5T480-800q117 0 198.5 81.5T760-520q69 8 114.5 59.5T920-340q0 39-15 72.5T864-210ZM593-479Z"/></svg>
+            <div class="header">
+                <button id="back-btn" onclick="window.history.back()">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/></svg>
+                    <p>Back</p>
+                </button>
+                <input type="text" id="module-name" class="post-info" placeholder="Module Name" value="{{data.Module}}" required>
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="m414-280 226-226-58-58-169 169-84-84-57 57 142 142ZM260-160q-91 0-155.5-63T40-377q0-78 47-139t123-78q25-92 100-149t170-57q117 0 198.5 81.5T760-520q69 8 114.5 59.5T920-340q0 75-52.5 127.5T740-160H260Zm0-80h480q42 0 71-29t29-71q0-42-29-71t-71-29h-60v-80q0-83-58.5-141.5T480-720q-83 0-141.5 58.5T280-520h-20q-58 0-99 41t-41 99q0 58 41 99t99 41Zm220-240Z"/></svg>
+                <div class="right-btn">
+                    <button id="preview-btn" onclick="window.open('{{ url_for('admin.preview', tempcontent_id=data.id) }}', '_blank')">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z"/></svg>
+                        <p>Preview</p>
+                    </button>
+                    <button id="publish-btn" onclick="publish()">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z"/></svg>
+                        <p>Publish</p>
+                    </button>
+                </div>
             </div>
-            <button id="preview-btn" onclick="window.open('{{ url_for('admin.preview', tempcontent_id=data.id) }}', '_blank')">
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z"/></svg>
-                <p>Preview</p>
-            </button>
-            <button id="publish-btn" onclick="publish()">
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z"/></svg>
-                <p>Publish</p>
-            </button>
         </header>
         <div class="content">
             <div class="main-container">
-                <div id="editor">{% if data.generated_html %}{{ data.generated_html | safe }}{% endif %}</div>
+                <div id="editor-status" class="status-indicator">Idle</div>
+                <div id="editor">
+{{data.generated_html|safe}}
+</div>
             </div>
             <div class="side-bar">
-                <input type="text" id="class-name" class="post-info" placeholder="Class Name" value="{{data.Class}}">
-                <input type="text" id="course-name" class="post-info" placeholder="Course Name" value="{{data.Course}}">
+                <div class="info-container">
+                    <p>Class Nama :</p>
+                    <input type="text" id="class-name" class="post-info" placeholder="Class Name" value="{{data.Class}}" required>
+                </div>
+                <div class="info-container">
+                    <p>Course Nama :</p>
+                    <input type="text" id="course-name" class="post-info" placeholder="Course Name" value="{{data.Course}}" required>
+                </div>
+                <div class="info-container">
+                    <p>Visit Nama :</p>
+                    <input type="number" id="visit-point" class="post-info" placeholder="Visit Point" value="{{data.Visit_point}}" required>
+                </div>
+                <div class="info-container">
+                    <p>Finish Nama :</p>
+                    <input type="number" id="finish-point" class="post-info" placeholder="Finish Point" value="{{data.Finish_point}}" required>
+                </div>
             </div>
         </div>
 
         <!-- script in here -->
-        <script type="importmap">
-            {
-                "imports": {
-                    "ckeditor5": "https://cdn.ckeditor.com/ckeditor5/43.3.1/ckeditor5.js",
-                    "ckeditor5/": "https://cdn.ckeditor.com/ckeditor5/43.3.1/"
-                }
-            }
-        </script>
+        <script src="https://cdn.ckeditor.com/ckeditor5/43.3.1/ckeditor5.umd.js"></script>
 		<script>
+            let typingTimer;
+            const typingDelay = 500;
+            let content = {'id': {{data.id}} };
+
             // ckeditor script
-			import {
+			const {
                 SourceEditing,
 				ClassicEditor,
 				Essentials,
@@ -200,7 +315,12 @@
                 TableToolbar,
                 Underline,
                 Heading,
-			} from 'ckeditor5';
+                FullPage,
+                Indent,
+                IndentBlock,
+                Autosave,
+                PendingActions
+			} = CKEDITOR;
 			ClassicEditor
 				.create( document.querySelector( '#editor' ), {
 					plugins: [
@@ -227,6 +347,11 @@
                     TableToolbar,
                     Underline,
                     Heading,
+                    FullPage,
+                    Indent,
+                    IndentBlock,
+                    Autosave,
+                    PendingActions,
                     ],
 					toolbar: [
                         'sourceEditing','|',
@@ -234,28 +359,38 @@
                         'heading','|',
                         'bold', 'italic', 'underline', '|',
 						'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', '|',
-                        'bulletedList', 'numberedList', ,'|',
+                        'outdent', 'indent', '|',
+                        'bulletedList', 'numberedList', '|',
                         'link','insertImage', 'insertTable', '|',
                         'mediaEmbed',
 					],
                     image: {
                     toolbar: ['imageTextAlternative', 'imageStyle:inline', 'imageStyle:block', 'imageStyle:side']
                 },
-				} )
+                autosave: {
+                        waiting_time: typingDelay,
+                        save( editor ) {
+                            content['html'] = editor.getData();
+                            return save_content();
+                        }
+				    }
+                })
 				.then( editor => {
-					window.editor = editor;
+                    window.editor = editor;
+                    editor.ui.view.editable.element.addEventListener('keydown', function(event) {
+                        if (event.key === 'Tab') {
+                            event.preventDefault();  // Prevent default tab behavior (focus shift)
+                            editor.execute('indent');  // Indent the text
+                        }
+                    });
+                    displayStatus( editor );
 				} )
 				.catch( error => {
 					console.error( error );
 				} );
-        </script>
-        <script>
+
             // the page script
-            let typingTimer;
-            const typingDelay = 500;
-            let content = {'id': {{data.id}} };
-            const save = document.getElementById('save');
-            const unsaved = document.getElementById('unsaved');
+            const statusIndicator = document.querySelector('#editor-status');
 
             //get the content from input every time user stop typing
             const post_infos = document.querySelectorAll(".post_info");
@@ -264,21 +399,15 @@
                     clearTimeout(typingTimer) //reset the timer when user typing
                     typingTimer = setTimeout(()=>{
                         content[info.id] = info.value;
-                        unsaved.classList.remove('hidden');
-                        save.classList.add('hidden');
+                        updateStatus();
                     });
                 })
             });
 
-            //get the content from ckeditor every time user stop typing
-            editor.model.document.on('change:data', () => {
-                clearTimeout(typingTimer) //reset the timer when user typing
-                typingTimer = setTimeout(()=>{
-                    content['generated_html'] = editor.getData();
-                    unsaved.classList.remove('hidden');
-                    save.classList.add('hidden');
-                });
-            });
+            //function to update the status saving
+            function updateStatus() {
+                statusIndicator.classList.add('busy'); // Indicate that changes are pending
+            }
 
             //function to save the content
             function  save_content(){
@@ -289,9 +418,25 @@
                    },
                    body: JSON.stringify(content), 
                }).then(Response => Response.ok).then(() => {
-                   unsaved.classList.add('hidden');
-                   save.classList.remove('hidden');
+                   resetStatus();
                });
+            }
+
+            //function to reset the status saving
+            function resetStatus() {
+                statusIndicator.classList.remove('busy'); // Remove the busy indicator once the content is saved
+            }
+            function displayStatus( editor ) {
+                const pendingActions = editor.plugins.get( 'PendingActions' );
+                const statusIndicator = document.querySelector( '#editor-status' );
+
+                pendingActions.on( 'change:hasAny', ( evt, propertyName, newValue ) => {
+                    if ( newValue ) {
+                        statusIndicator.classList.add( 'busy' );
+                    } else {
+                        statusIndicator.classList.remove( 'busy' );
+                    }
+                } );
             }
 
             //function to publish the content

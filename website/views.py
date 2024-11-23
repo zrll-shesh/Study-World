@@ -61,8 +61,3 @@ def profile():
 @login_required
 def settings():
     return render_template('user/settings.html', user= current_user, current_url=request.path)
-
-@views.errorhandler(Exception)
-def handle_exception(e):
-    error_code = getattr(e, 'code', 500)
-    return render_template('error.html', error_code=error_code), error_code

@@ -234,8 +234,8 @@
             <ul>
                 {% for module in modules %}
                 <li class="module-card {% if loop.index > 4 %}hidden{% endif %}">
-                    <a href="{{ url_for('views.course_file_route', class_name=class_name, course=course, course_file=module) }}">
-                    <img src="{{ url_for('static', filename='img/courses/'+ class_name + '/' + course + '/' + module + '.jpg') }}" 
+                    <a href="{{ url_for('views.course_file_route', class_name=class_name, course=course, course_file=module[0]) }}">
+                    <img src="{{ url_for('static', filename='img/courses/'+ class_name + '/' + course + '/' + module[1]) }}" 
                         alt="{{ image }}">
                         <div class="flex-container-2">
                             <div class="flex-text">
