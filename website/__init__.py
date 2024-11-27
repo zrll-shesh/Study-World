@@ -10,7 +10,7 @@ DB_NAME = "database.db"
 mail = Mail()
 login_manager = LoginManager()
 login_manager.login_view = 'auth.auth_page'
-load_dotenv('website/.env')
+# load_dotenv('website/.env')
 app = Flask(__name__)
 def create_app():
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
