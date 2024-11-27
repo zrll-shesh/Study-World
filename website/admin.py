@@ -1,13 +1,13 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
-from .models import get_tempcontent, content_dash, pages_information, delete_page, update_publish
+from flask import Blueprint, render_template, redirect, url_for, request, jsonify
+from .models import get_tempcontent, content_dash, pages_information, delete_page, update_publish, user_information, change_role
 from flask_login import current_user
 from functools import wraps
+import math
 
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated or not current_user.admin :
-            flash("Kamu tidak memiliki akses untuk halaman ini.", "danger")
             return render_template("error.html", error_code=403, error_message="Kamu tidak memiliki akses untuk halaman ini.")
         return f(*args, **kwargs)
     return decorated_function
@@ -25,14 +25,9 @@ def home():
             chart_data['user'] = new_user_every_day
         if data.get('graph')['views']:
             chart_data['views'] = views_every_day
-        box_data = [
-            new_user,
-            total_user,
-            total_content,
-            total_views
-        ]
+        box_data = (new_user,total_user, total_content, total_views)
         return jsonify({"chart_data": chart_data, "box_data": box_data})
-    return render_template("admin/home.html", current_url=request.path)
+    return render_template("admin/home.html", current_url=request.path, user=current_user)
 
 @admin.route('/page-management', methods=['GET', 'POST'])
 @admin_required
@@ -54,18 +49,16 @@ def pages():
             data_content, classes, courses = pages_information()
         filtered_content = [
             content for content in data_content
-            if (str(content['class']) in data[selectedValue].get("classes",[])) and
-               (str(content['course']) in data[selectedValue].get("courses",[]))
+            if (str(content[1]) in data[selectedValue].get("classes",[])) and
+               (str(content[2]) in data[selectedValue].get("courses",[]))
         ]
         return render_template("admin/page_update.html", classes=classes, courses=courses, content_data=filtered_content, draft=is_draft)
-    return render_template("admin/page-management.html", current_url=request.path, classes=classes, courses=courses, content_data=data_content)
+    return render_template("admin/page-management.html", current_url=request.path, classes=classes, courses=courses, content_data=data_content, user=current_user)
 
 @admin.route('/add-post')
 @admin_required
 def add_page():
-    with open("website/templates/admin/template.html") as f:
-        content = f.read()
-    temp_id = get_tempcontent(html=content).id
+    temp_id = get_tempcontent().id
     return redirect(url_for('admin.edit_module', tempcontent_id=temp_id))
 
 @admin.route('/edit/<int:tempcontent_id>')
@@ -76,7 +69,7 @@ def edit_module(tempcontent_id = None, class_name = None, course = None, course_
         temp_content = get_tempcontent(list_path=[class_name, course, course_file])
         return redirect(url_for('admin.edit_module', tempcontent_id=temp_content.id))
     data = get_tempcontent(tempcontent_id)
-    return render_template("admin/add_update.html", current_url=request.path, data=data)
+    return render_template("admin/add_update.html", data=data)
 
 @admin.route('/save', methods=['POST'])
 @admin_required
@@ -99,13 +92,21 @@ def save_content():
 @admin.route('/preview/<int:tempcontent_id>')
 @admin_required
 def preview(tempcontent_id):
-    data = get_tempcontent(tempcontent_id)
-    return data.generated_html
+    content = get_tempcontent(tempcontent_id)
+    return render_template('template_module.html', content=content.generated_html, module_name= content.Module)
 
-@admin.route('/user-management')
+@admin.route('/user-management', methods=['GET', 'POST'])
+@admin.route('/user-management?page=<int:page>')
 @admin_required
-def users():
-    return render_template("admin/home.html", current_url=request.path)
+def users(number_page=1):
+    if request.method == 'POST':
+        data = request.get_json()
+        role = data.get("role")
+        change_role(data.get("id"), role)
+        return jsonify({"success": True})
+    total_users, users = user_information(page_size=10, page_num=number_page)
+    total_pages = math.ceil(total_users/10) 
+    return render_template("admin/user-management.html", current_url=request.path, total_pages=total_pages, users=users, user=current_user)
 
 @admin.route('/settings')
 @admin_required

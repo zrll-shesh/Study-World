@@ -182,15 +182,10 @@
             background-color: #333333 !important;
             color:#5e63ff !important;
         }
-        #no-data-message{
-            position: absolute;
-            z-index: 1;
-        }
 
 </style>
 {% endblock%}
 {% block main_content %}
-<main>
     <!-- Header content -->
     <header>
         <button onclick="toggleSidebar()" class="hamburger toggle-btn">
@@ -200,7 +195,7 @@
         <div class="icons">
             <button id="update" onclick="toggleUpdate(this)"><img src="{{ url_for('static', filename='img/dash/refresh.png') }}"></button>
             <button><img src="{{ url_for('static', filename='img/dash/notif-icon.svg') }}"></button>
-            <button><img src="{{ url_for('static', filename='img/dash/pp-icon.svg') }}"></button>
+            <button><img src="{{ url_for('static', filename=user.photo) }}"></button>
         </div>
     </header>
     <div class="items-box">
@@ -263,7 +258,6 @@
         <p id="no-data-message" style="visibility: hidden;">No data available.</p>
         </div>
     </div>
-</main>
 {% endblock %}
 
 {% block extra_script %}
@@ -397,14 +391,14 @@
                 let users= [];
                 let views= [];
                 if ('user' in chart_data){
-                    users = chart_data.user.map(item => item.user);
+                    users = chart_data.user.map(item => item[1]);
                     graph = 'user';
                 }
                 if ('views' in chart_data){
-                    views = chart_data.views.map(item => item.views);
+                    views = chart_data.views.map(item => item[1]);
                     graph = 'views';
                 }
-                const labels = chart_data[graph].map(item => item.date);
+                const labels = chart_data[graph].map(item => item[0]);
                 myChart.data.labels = labels;
                 myChart.data.datasets[0].data = users;
                 myChart.data.datasets[1].data = views;

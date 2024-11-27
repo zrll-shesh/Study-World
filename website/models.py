@@ -6,6 +6,7 @@ from datetime import datetime,timedelta
 from bs4 import BeautifulSoup
 from sqlalchemy import func
 import os
+import shutil
 import base64
 
 
@@ -14,9 +15,12 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(150), unique=True, nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
-    admin = db.Column(db.Boolean, nullable=False, default=False)
+    points = db.Column(db.Integer, nullable=False, default=0)
     timestamp = db.Column(db.Date, nullable=False, default=db.func.current_date())
-    content = db.relationship('Content', backref='creator', lazy=True)
+    photo = db.Column(db.Text, nullable=False, default='/img/dash/pp-icon.svg')
+    School_name = db.Column(db.String(150))
+    admin = db.Column(db.Boolean, nullable=False, default=False)
+
 
 class Content(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -49,6 +53,8 @@ class TempContent(db.Model):
     Finish_point = db.Column(db.Integer, default=0)
     Created_at = db.Column(db.DateTime, default=db.func.now())
 
+
+
 def TrackViewPoints(page):
     #track all point and view for each module
     user_id = current_user.get_id()
@@ -59,11 +65,14 @@ def TrackViewPoints(page):
         today = db.func.current_date()
         data = DailyTrack.query.filter_by(user_id=user_id, page=page_id, date=today).first()
         point = Content.query.get(page_id).Visit_point
+        user = User.query.get(user_id)
         if data:
             data.page_view += 1
             data.user_point += point
+            user.points += point
         else:
             new_track = DailyTrack(user_id=user_id, page=page_id, page_view=1, user_point=point)
+            user.points += point
             db.session.add(new_track)
         db.session.commit()
     else:
@@ -75,7 +84,9 @@ def TrackFinishPoints(page):
     page_id = Content.query.filter_by(Module=page).first().id
     data = DailyTrack.query.filter_by(user_id=user_id, page=page_id, date=db.func.current_date()).first()
     point = Content.query.get(page_id).Finish_point
+    user = User.query.get(user_id)
     data.user_point += point
+    user.points += point
     db.session.commit()
 
 def get_content(is_latest=False):
@@ -100,23 +111,21 @@ def content_dash(range_date):
     total_content = Content.query.count()
     total_views = db.session.query(db.func.sum(DailyTrack.page_view)).scalar() or 0
     
-    views_data = []
-    user_data = []
     if range_date == 'all':
-        views_data = db.session.query(DailyTrack.date, db.func.sum(DailyTrack.page_view))\
-        .group_by(DailyTrack.date).all()
-        user_data = db.session.query(User.timestamp,db.func.count(User.id))\
-        .group_by(User.timestamp).all()
+        views_data = db.session.query(func.strftime('%Y-%m-%d',DailyTrack.date), db.func.sum(DailyTrack.page_view))\
+        .group_by(func.strftime('%Y-%m-%d',DailyTrack.date)).all()
+        new_user_data = db.session.query(func.strftime('%Y-%m-%d', User.timestamp).label('timestamp_str'),db.func.count(User.id))\
+        .group_by(func.strftime('%Y-%m-%d', User.timestamp)).all()
     else:
         range_date = int(range_date)
         start_date = date_now - timedelta(days=range_date)
-        views_data = db.session.query(DailyTrack.date, db.func.sum(DailyTrack.page_view))\
-        .filter(DailyTrack.date.between(start_date, date_now)).group_by(DailyTrack.date).all()
-        user_data= db.session.query(User.timestamp, func.count(User.id))\
-        .filter(User.timestamp.between(start_date, date_now)).group_by(User.timestamp).all()
-    views_every_day = [{'date' : str(v[0]), 'views' : v[1]} for v in views_data]
-    new_user_every_day = [{'date' : str(u[0]), 'user' : u[1]} for u in user_data]
-    return new_user, total_user, total_content, total_views, new_user_every_day, views_every_day
+        views_data = db.session.query(func.strftime('%Y-%m-%d',DailyTrack.date), db.func.sum(DailyTrack.page_view))\
+        .filter(DailyTrack.date.between(start_date, date_now)).group_by(func.strftime('%Y-%m-%d',DailyTrack.date)).all()
+        new_user_data= db.session.query(func.strftime('%Y-%m-%d', User.timestamp).label('timestamp_str'), func.count(User.id))\
+        .filter(User.timestamp.between(start_date, date_now)).group_by(func.strftime('%Y-%m-%d', User.timestamp)).all()
+    new_user_every_day = (tuple(data) for data in new_user_data)
+    views_every_day = (tuple(data) for data in views_data)
+    return new_user, total_user, total_content, total_views, tuple(new_user_every_day), tuple(views_every_day)
 
 def pages_information(is_draft=False):
     if is_draft:
@@ -127,20 +136,15 @@ def pages_information(is_draft=False):
         unique_classes = db.session.query(Content.Class).distinct().all()
         unique_courses = db.session.query(Content.Course).distinct().all()
         all_content = Content.query.order_by(Content.Created_at.desc()).all()
-    classes = [classe[0] for classe in unique_classes]
-    courses = [course[0] for course in unique_courses]
+    classes = (classe[0] for classe in unique_classes)
+    courses = (course[0] for course in unique_courses)
 
     def format_datetime(dt):
         return dt.strftime('%d %B %Y %H:%M:%S')
-    data_contents = [{
-            'id' : content.id,
-            'class': content.Class,
-             'course': content.Course,
-             'module': content.Module,
-             'creator': getattr(content, 'Creator', None),
-             'created_at': format_datetime(content.Created_at),
-            'views': getattr(content, 'Views', None)}
-    for content in all_content]
+    data_contents = ((
+            content.id, content.Class, content.Course, content.Module, getattr(content, 'Creator', ''),
+            format_datetime(content.Created_at), getattr(content, 'Views', 0))
+    for content in all_content)
     return data_contents, classes, courses
 
 def delete_page(id_content, is_draft=False):
@@ -148,8 +152,10 @@ def delete_page(id_content, is_draft=False):
         page = TempContent.query.filter_by(id=id_content).first()
     else:
         page = Content.query.filter_by(id=id_content).first()
-        path_file = os.path.join(os.getcwd(), 'website/static/courses', page.Class, page.Course, page.Module,'.html')
-        os.remove(path=path_file)
+        path_html = os.path.join(os.getcwd(), 'website/static/courses', page.Class, page.Course, page.Module,'.html')
+        path_img = os.path.join(os.getcwd(),'website/static/img/courses', page.Class, page.Course, page.Module)
+        shutil.rmtree(path_img)
+        os.remove(path=path_html)
     if page:
         db.session.delete(page)
         db.session.commit()
@@ -170,7 +176,7 @@ def save_images_and_get_updated_html(html_content, class_name,course_name, modul
                 img_path = image_filename
             
             # Determine the directory for storing the image file
-            directory = os.path.join(os.getcwd(),'website/static/img/courses', class_name, course_name)
+            directory = os.path.join(os.getcwd(),'website/static/img/courses', class_name, course_name, module_name)
             if not os.path.exists(directory):
                 os.makedirs(directory)
             
@@ -209,14 +215,17 @@ def update_publish(id_tempcontent,classe=None, course=None, module=None, html=No
         db.session.delete(temp_content)
     db.session.commit()
 
-def get_tempcontent(id_tempcontent=None, list_path=None, html=None):
+def get_tempcontent(id_tempcontent=None, list_path=None):
     if id_tempcontent:
         return TempContent.query.filter_by(id=id_tempcontent).first()
     else:
         if list_path:
-            temp_content = TempContent.query.filter_by(Class=list_path[0], Course=list_path[1], Module=list_path[2]).first()
+            content = Content.query.filter_by(Class=list_path[0], Course=list_path[1], Module=list_path[2]).first()
+            with open(os.path.join(os.getcwd(), 'website/static/courses', list_path[0], list_path[1], list_path[2], '.html'), 'r', encoding='utf-8') as file:
+                html = file.read()
+            temp_content = TempContent(Class=content.Class, Course=content.Course, Module=content.Module, user_id=current_user.get_id(), generated_html=html)
         else:
-            temp_content = TempContent(Class=None, Course=None, Module=None, generated_html=html, user_id=current_user.get_id())
+            temp_content = TempContent(Class=None, Course=None, Module=None, user_id=current_user.get_id())
             db.session.add(temp_content)
             db.session.commit()
         return temp_content
@@ -227,24 +236,44 @@ def delete_tempcontent(id_tempcontent=None):
         db.session.delete(temp_content)
         db.session.commit()
         
-def point_information(user_id, leader=None, range_date=None):
+def point_information(range_date=None):
     # get point information for each user
-    if leader:
-        top_leader = db.session.query(
-            DailyTrack.user_id, db.func.sum(DailyTrack.user_point)
-        ).group_by(DailyTrack.user_id).order_by(
-            db.func.sum(DailyTrack.user_point).desc()
-        ).limit(3).all()
+    ranked_query = db.session.query(User.username, User.points, User.photo).order_by(User.points.desc())
+    leaderboard = []
+    user_rank = None
+    for index, (username, points, photo) in enumerate(ranked_query, start=1):
+        user = (index, username, f"{points:,}".replace(',', '.'), photo)
+        leaderboard.append(user)
+        if current_user.username == username:
+            user_rank = user
+        if user_rank and index == 10:
+            break
+    leaderboard = leaderboard[:10]
+    if user_rank and user_rank not in leaderboard:
+        leaderboard.append(user_rank)
     if range_date == 'all':
-        user_point_every_day = db.session.query(DailyTrack.date, db.func.sum(DailyTrack.user_point)).filter(
-            DailyTrack.user_id == user_id
+        user_point_data = db.session.query(DailyTrack.date, db.func.sum(DailyTrack.user_point)).filter(
+            DailyTrack.user_id == current_user.id
         ).group_by(DailyTrack.date).all()
     elif range_date:
         start_date = db.func.current_date() - timedelta(days=range_date)
-        user_point_every_day = db.session.query(DailyTrack.date, db.func.sum(DailyTrack.user_point)).filter(
-            DailyTrack.user_id == user_id
-        ).filter(DailyTrack.date.between(start_date, db.func.current_date())).group_by(DailyTrack.date).all()
-    user_point = db.session.query(db.func.sum(DailyTrack.user_point)).filter(
-        DailyTrack.user_id == user_id
-    ).scalar()
-    return user_point, top_leader, user_point_every_day
+        user_point_data = db.session.query(func .strftime('%Y-%m-%d', DailyTrack.date).label('date'), db.func.sum(DailyTrack.user_point)).filter(
+            DailyTrack.user_id == current_user.id
+        ).filter(DailyTrack.date.between(start_date, db.func.current_date())).group_by(func.strftime('%Y-%m-%d', DailyTrack.date)).all()
+    user_point = User.query.get(current_user.id).points
+    user_point_every_day = tuple((p) for p in user_point_data)
+    return user_point, leaderboard, user_point_every_day
+
+def user_information(page_size=10, page_num=1):
+    total_user = User.query.count()
+    pagination = User.query.order_by(User.id).paginate(page=page_num, per_page=page_size, error_out=False)
+    return total_user, pagination
+
+def change_role(user_id, role):
+    user = User.query.filter_by(id=user_id).first()
+    if role == 'admin':
+        user.admin = True
+    else:
+        user.admin = False
+    db.session.commit()
+
