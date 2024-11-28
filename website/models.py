@@ -208,7 +208,7 @@ def update_publish(id_tempcontent,classe=None, course=None, module=None, html=No
         temp_content = TempContent.query.filter_by(id=id_tempcontent).first()
         html_with_img, img_path = save_images_and_get_updated_html(temp_content.generated_html, classe, course, module)
         save_html(html_with_img, classe, course, module)
-        content = Content(Module=module, Class=classe, Course=course, Visit_point=Visit_point, Finish_point=Finish_point, img_path=img_path)
+        content = Content(Module=module, Class=classe, Course=course, Visit_point=Visit_point, Finish_point=Finish_point, img_path=img_path, Creator=current_user.username)
         db.session.add(content)
         db.session.delete(temp_content)
     db.session.commit()
