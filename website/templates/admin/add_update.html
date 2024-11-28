@@ -212,11 +212,10 @@
                 images_upload_handler: function (blobInfo, success, failure) {
                     //convert image to base 64
                     const reader = new FileReader();
-                    updateStatus(true);
                     reader.onload = () => {
                         const base64data = reader.result().split(',')[1];
                         success('data:image/jpeg;base64,'+base64data);
-                        read_content(editor);
+                        updateStatus();
                     };
                     reader.onerror = function(error) {
                         failure('Image upload failed');
@@ -227,7 +226,7 @@
                     editor.on('keyup', () => {
                         clearTimeout(typingTimer);
                         typingTimer = setTimeout(() => {
-                        content['html'] = editor.getContent();
+                        updateStatus();
                         updateStatus();
                         }, typingDelay);
                     });
@@ -235,15 +234,23 @@
             });
                 
             // the page script
+            function updateContentFields() {
+                    // Update TinyMCE content
+                    if (tinymce.activeEditor) {
+                        content['html'] = tinymce.activeEditor.getContent();
+                    }
+                    // Update post-info inputs
+                    const postInfos = document.querySelectorAll(".post-info");
+                    postInfos.forEach(info => {
+                        content[info.id] = info.value;
+                    });
+                }
                 //get the content from input every time user stop typing
                 const post_infos = document.querySelectorAll(".post-info");
                 post_infos.forEach(info =>{
                 info.addEventListener("input", ()=>{
                     clearTimeout(typingTimer) //reset the timer when user typing
                     typingTimer = setTimeout(function save_input(){
-                        post_infos.forEach(info =>{
-                            content[info.id] = info.value;
-                        })
                         updateStatus();
                     }, typingDelay);
                 })
@@ -262,8 +269,7 @@
             
             //function to save the content
             function  save_content(){
-                read_content(editor);
-                save_input();
+                updateContentFields();
                 fetch("{{ url_for('admin.save_content') }}", {
                    method: "POST",
                    headers: {
