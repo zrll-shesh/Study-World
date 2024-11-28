@@ -53,8 +53,6 @@ class TempContent(db.Model):
     Finish_point = db.Column(db.Integer, default=0)
     Created_at = db.Column(db.DateTime, default=db.func.now())
 
-
-
 def TrackViewPoints(page):
     #track all point and view for each module
     user_id = current_user.get_id()
@@ -163,7 +161,7 @@ def delete_page(id_content, is_draft=False):
 def save_images_and_get_updated_html(html_content, class_name,course_name, module_name):
     soup = BeautifulSoup(html_content, 'html.parser')
     images = soup.find_all('img')
-    
+    img_path = None
     for idx,image in enumerate(images):
         src = image.get('src')
         if src.startswith('data:image'):
@@ -186,7 +184,7 @@ def save_images_and_get_updated_html(html_content, class_name,course_name, modul
             with open(image_path, 'wb') as f:
                 f.write(base64.b64decode(img_data))
             # Update the image src in the HTML to the relative file path
-            image['src'] = url_for('uploaded_file', filename=os.path.join(course_name, class_name, image_filename))
+            image['src'] = url_for('static', filename=os.path.join('img/courses',class_name, course_name, module_name, image_filename))
     return str(soup), img_path
     
 def save_html(html_content, class_name, course_name, module_name):

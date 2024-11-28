@@ -98,7 +98,7 @@
         }
     }
     .hidden{
-        display: none;
+        display: none !important;
     }
     .active-btn{
         border-bottom: #575ce8 solid 2px !important;
@@ -177,8 +177,8 @@
         border: 3px solid #b8b8b8;
         border-radius: 5px;
     }
-    .popup-container{
-        position: fixed;
+    #popup-container{
+        position: absolute;
         top: 0;
         left: 0;
         width: 100%;
@@ -187,23 +187,91 @@
         justify-content: center;
         align-items: center;
     }
+    .blur{
+        opacity: 0.5;
+        filter: blur(5px);
+    }
+    .popup{
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background-color: #333333;
+        border-radius: 10px;
+        padding: 5rem;
+        z-index: 3;
+        form{
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            color:#ffffff;
+            padding: 5px;
+            .submit{
+                padding: 10px 20px;
+                margin-top: 20px;
+                border-radius: 5px;
+                border: none;
+                cursor: pointer;
+                color: #ffffff;
+                background-color: var(--accent-clr);
+            }
+            .submit:hover{
+                background-color: #575ce8;
+            }
+            div{
+                display: flex;
+                justify-content: space-between;
+                width: 100%;
+                align-items: center;
+            }
+            input{
+                padding: 5px;
+                border-radius: 5px;
+                border: none;
+                outline: none;
+            }
+        }
+    }
+    .back{
+        position: relative;
+        top: 10px;
+        padding: 5px;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        color: #ffffff;
+        background-color: #646363;
+    }
+    .back:hover{
+        background-color: #353538;
+    }
 </style>
 {% endblock %}
 {% block popup %}
-<div class="popup-container">
+<div id="popup-container" class="hidden">
     <div id="email" class="popup hidden">
         <form>
             <input type="hidden" name="form_type" value="update-email">
-            <label for="old-email">Email Lama</label>
-            <input type="email" id="old-email" name="old-email" required>
-            <label for="new-email">Email Baru</label>
-            <input type="email" id="new-email" name="new-email" required>
-            <button type="submit">Confirm</button>
+            <div>
+                <button class="back">Kembali</button>
+            </div>
+            <h2>Ubah Email</h2>
+            <div>
+                <label for="old-email">Email Lama</label>
+                <input type="email" id="old-email" name="old-email" required>
+            </div>
+            <div>
+                <label for="new-email">Email Baru</label>
+                <input type="email" id="new-email" name="new-email" required>
+            </div>
+            <button class="submit" type="submit">Confirm</button>
         </form>
     </div>
     <div id="confirm-email" class="popup hidden">
         <div class="back">
-            <p>kembali</p>
+            <button>Kembali</button>
         </div>
         <div class="title">
             <h2>Cek Emailmu</h2>
@@ -313,9 +381,14 @@
             btn.classList.remove('active-btn');
         });
         button.classList.add('active-btn');
-    }
-    // togglePopup(name_popup){
+    };
+    function togglePopup(name_popup){
+        const popup_container = document.getElementById('popup-container');
+        popup_container.classList.toggle('hidden');
+        const popup = document.getElementById(name_popup);
+        popup.classList.toggle('hidden');
+        document.getElementById('container').classList.toggle('blur');
+    };
 
-    // }
 </script>
 {% endblock %}
