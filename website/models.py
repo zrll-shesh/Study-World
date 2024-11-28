@@ -150,7 +150,7 @@ def delete_page(id_content, is_draft=False):
         page = TempContent.query.filter_by(id=id_content).first()
     else:
         page = Content.query.filter_by(id=id_content).first()
-        path_html = os.path.join(os.getcwd(), 'website/static/courses', page.Class, page.Course, page.Module,'.html')
+        path_html = os.path.join(os.getcwd(), 'website/templates/courses', page.Class, page.Course, f"{page.Module}.html")
         path_img = os.path.join(os.getcwd(),'website/static/img/courses', page.Class, page.Course, page.Module)
         shutil.rmtree(path_img)
         os.remove(path=path_html)
@@ -188,10 +188,10 @@ def save_images_and_get_updated_html(html_content, class_name,course_name, modul
     return str(soup), img_path
     
 def save_html(html_content, class_name, course_name, module_name):
-    directory = os.path.join('website/static/courses', class_name, course_name,'.html')
+    directory = os.path.join(os.getcwd(),'website/templates/courses', class_name, course_name)
     if not os.path.exists(directory):
         os.makedirs(directory)
-    file_path = os.path.join(directory, module_name)
+    file_path = os.path.join(directory,  f"{module_name}.html")
     with open(file_path, 'w', encoding='utf-8') as file:
         file.write(html_content)
 
@@ -219,7 +219,7 @@ def get_tempcontent(id_tempcontent=None, list_path=None):
     else:
         if list_path:
             content = Content.query.filter_by(Class=list_path[0], Course=list_path[1], Module=list_path[2]).first()
-            with open(os.path.join(os.getcwd(), 'website/static/courses', list_path[0], list_path[1], list_path[2], '.html'), 'r', encoding='utf-8') as file:
+            with open(os.path.join(os.getcwd(), 'website/static/courses', list_path[0], list_path[1], f"{list_path[2]}.html"), 'r', encoding='utf-8') as file:
                 html = file.read()
             temp_content = TempContent(Class=content.Class, Course=content.Course, Module=content.Module, user_id=current_user.get_id(), generated_html=html)
         else:
