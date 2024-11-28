@@ -234,36 +234,36 @@
                 }
             });
                 
-			
-                // the page script
-                
+            // the page script
                 //get the content from input every time user stop typing
                 const post_infos = document.querySelectorAll(".post-info");
                 post_infos.forEach(info =>{
                 info.addEventListener("input", ()=>{
                     clearTimeout(typingTimer) //reset the timer when user typing
-                    typingTimer = setTimeout(()=>{
-                        content[info.id] = info.value;
+                    typingTimer = setTimeout(function save_input(){
+                        post_infos.forEach(info =>{
+                            content[info.id] = info.value;
+                        })
                         updateStatus();
                     }, typingDelay);
                 })
             });
 
             //function to update the status saving
-            function updateStatus(img=false) {
+            function updateStatus() {
                 statusIndicator.classList.add('not-saved');
                 setTimeout(() => {
                     statusIndicator.classList.remove('not-saved');
                     statusIndicator.classList.add('loading');
                     void statusIndicator.offsetWidth;
-                    if(!img){
-                        save_content();
-                    }
+                    save_content();
                 }, 8000);
             }
             
             //function to save the content
             function  save_content(){
+                read_content(editor);
+                save_input();
                 fetch("{{ url_for('admin.save_content') }}", {
                    method: "POST",
                    headers: {
