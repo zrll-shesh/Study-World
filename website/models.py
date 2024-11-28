@@ -48,7 +48,7 @@ class TempContent(db.Model):
     Course = db.Column(db.String(150), index=True)
     Module = db.Column(db.String(150), index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    generated_html = db.Column(db.Text)
+    generated_html = db.Column(db.Text, default='')
     Visit_point = db.Column(db.Integer, default=0)
     Finish_point = db.Column(db.Integer, default=0)
     Created_at = db.Column(db.DateTime, default=db.func.now())
@@ -161,7 +161,7 @@ def delete_page(id_content, is_draft=False):
 def save_images_and_get_updated_html(html_content, class_name,course_name, module_name):
     soup = BeautifulSoup(html_content, 'html.parser')
     images = soup.find_all('img')
-    img_path = None
+    img_path = f"img/{course_name}.webp"
     for idx,image in enumerate(images):
         src = image.get('src')
         if src.startswith('data:image'):
@@ -169,7 +169,7 @@ def save_images_and_get_updated_html(html_content, class_name,course_name, modul
             img_type = src.split(";")[0].split("/")[1]
             
             # Generate a filename for the image
-            image_filename = f"{module_name} img{idx+1}.{img_type}"
+            image_filename = f"img/courses/{class_name}/{course_name}/{module_name}/image{idx+1}.{img_type}"
             if idx == 0:
                 img_path = image_filename
             
@@ -178,7 +178,7 @@ def save_images_and_get_updated_html(html_content, class_name,course_name, modul
             if not os.path.exists(directory):
                 os.makedirs(directory)
             
-            image_path = os.path.join(directory, image_filename)
+            image_path = os.path.join(directory, f'image {idx+1}.{img_type}')
             
             # Save the base64 image to the file
             with open(image_path, 'wb') as f:
@@ -223,7 +223,7 @@ def get_tempcontent(id_tempcontent=None, list_path=None):
                 html = file.read()
             temp_content = TempContent(Class=content.Class, Course=content.Course, Module=content.Module, user_id=current_user.get_id(), generated_html=html)
         else:
-            temp_content = TempContent(Class=None, Course=None, Module=None, user_id=current_user.get_id())
+            temp_content = TempContent(Class="", Course="", Module="", user_id=current_user.get_id())
             db.session.add(temp_content)
             db.session.commit()
         return temp_content

@@ -143,7 +143,7 @@
 	<body>
         <header>
             <div class="header">
-                <button id="back-btn" onclick="window.history.back()">
+                <button id="back-btn" onclick="back()">
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/></svg>
                     <p>Back</p>
                 </button>
@@ -212,10 +212,10 @@
                 images_upload_handler: function (blobInfo, success, failure) {
                     //convert image to base 64
                     const reader = new FileReader();
+                    updateStatus();
                     reader.onload = () => {
                         const base64data = reader.result().split(',')[1];
                         success('data:image/jpeg;base64,'+base64data);
-                        updateStatus();
                     };
                     reader.onerror = function(error) {
                         failure('Image upload failed');
@@ -226,7 +226,6 @@
                     editor.on('keyup', () => {
                         clearTimeout(typingTimer);
                         typingTimer = setTimeout(() => {
-                        updateStatus();
                         updateStatus();
                         }, typingDelay);
                     });
@@ -286,6 +285,14 @@
                 if(confirm("Are you sure you want to publish this content?")){
                     content["publish"] = true;
                     save_content();
+                    window.location.href = "{{ url_for('admin.pages') }}";
+                }
+            }
+            function back(){
+                if (statusIndicator.classList.contains('loading') || statusIndicator.classList.contains('not-saved')){
+                    if (confirm("Your progress is not saved, Are you sure you want to go back?")) {
+                        window.location.href = "{{ url_for('admin.pages') }}";
+                    }
                 }
             }
 		</script>

@@ -47,11 +47,11 @@ def home():
     try:
         all_courses = get_content()
         example = [
-            {"name": "Kimia", "class": "Kelas XII MIPA", "image": "chemistry.webp"},
-            {"name": "Biologi", "class": "Kelas XI MIPA", "image": "biology.webp"},
-            {"name": "Matematika", "class": "Kelas XI MIPA", "image": "math.webp"},
-            {"name": "Fisika", "class": "Kelas X MIPA", "image": "physics.webp"},
-            {"name": "Python", "class": "Untuk semua", "image": "coding.webp"},
+            {"name": "Kimia", "class": "Kelas XII MIPA", "image": "Kimia.webp"},
+            {"name": "Biologi", "class": "Kelas XI MIPA", "image": "Biologi.webp"},
+            {"name": "Matematika", "class": "Kelas XI MIPA", "image": "Matematika.webp"},
+            {"name": "Fisika", "class": "Kelas X MIPA", "image": "Fisika.webp"},
+            {"name": "Python", "class": "Untuk semua", "image": "Python.webp"},
         ]
         return render_template('user/home.html', classes=all_courses.keys(), courses=example, user= current_user, current_url=request.path)
     except Exception as e:
