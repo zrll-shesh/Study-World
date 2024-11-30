@@ -289,7 +289,6 @@ def change_role(user_id, role):
 
 def change_profile(username, school ,src_img=None):
     try:
-        print(src_img)
         if src_img != None:
             img_data = src_img.split(',')[1]
             img_type = src_img.split(';')[0].split('/')[1]
