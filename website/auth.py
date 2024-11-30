@@ -6,7 +6,7 @@ from . import mail, db
 from flask_mail import Message
 from werkzeug.security import generate_password_hash, check_password_hash
 import random
-from flask_login import login_user, login_required, logout_user, current_user
+from flask_login import login_user, login_required, logout_user
 
 
 auth = Blueprint('auth', __name__)
@@ -25,6 +25,22 @@ def generated_send_OTP(email):
     msg.body = f"Your OTP Code is\n\n{otp_code}"
     mail.send(msg)
     return otp_code
+
+def check_password(password1, password2):
+    if password1 != password2:
+        return "Password tidak sama"
+    elif len(password1) < 8:
+        return "Password kurang dari 8 karakter"
+    elif not any(c.isdigit() for c in password1):
+        return "Password harus terdiri dari minimal satu angka"
+    elif not any(c.isupper() for c in password1):
+        return "Password harus terdiri dari minimal satu huruf besar"
+    elif not any(c.islower() for c in password1):
+        return "Password harus terdiri dari minimal satu huruf kecil"
+    elif not any(c in punctuation for c in password1):
+        return "Password harus terdiri dari minimal satu karakter spesial"
+    else:
+        return
 
 @auth.route('/auth')
 def auth_page():
@@ -61,24 +77,15 @@ def signup():
         "Message": ""
         }
     user = User.query.filter_by(email=email).first()
+    password_check = check_password(password1, password2)
     if user:
         response['Message'] = "Email sudah terdaftar"
     elif len(name) < 4:
         response['Message'] = "Nama terlalu pendek"
     elif not is_emailValid(email):
         response['Message'] = "Email tidak valid"
-    elif password1 != password2:
-        response['Message'] = "Password tidak sama"
-    elif len(password1) < 8:
-        response['Message'] = "Password kurang dari 8 karakter"
-    elif not any(c.isdigit() for c in password1):
-        response['Message'] = "Password harus terdiri dari minimal satu angka"
-    elif not any(c.isupper() for c in password1):
-        response['Message'] = "Password harus terdiri dari minimal satu huruf besar"
-    elif not any(c.islower() for c in password1):
-        response['Message'] = "Password harus terdiri dari minimal satu huruf kecil"
-    elif not any(c in punctuation for c in password1):
-        response['Message'] = "Password harus terdiri dari minimal satu karakter spesial"
+    elif password_check:
+        response['Message'] = password_check
     else:
         response["success"] = True
         otp_stored[email] = {

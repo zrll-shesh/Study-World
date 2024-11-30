@@ -5,6 +5,7 @@ from collections import defaultdict
 from datetime import datetime,timedelta
 from bs4 import BeautifulSoup
 from sqlalchemy import func
+from sqlalchemy.ext.mutable import MutableDict
 import os
 import shutil
 import base64
@@ -17,8 +18,10 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(150), nullable=False)
     points = db.Column(db.Integer, nullable=False, default=0)
     timestamp = db.Column(db.Date, nullable=False, default=db.func.current_date())
-    photo = db.Column(db.Text, nullable=False, default='/img/dash/pp-icon.svg')
-    School_name = db.Column(db.String(150))
+    photo = db.Column(db.Text, nullable=False, default='img/dash/pp-icon.svg')
+    School_name = db.Column(db.String(150), default='')
+    web_notif = db.Column(MutableDict.as_mutable(db.JSON), nullable=False, default=lambda: {"acc_activity": True, "anoncement": True})
+    email_notif = db.Column(MutableDict.as_mutable(db.JSON), nullable=False, default=lambda: {"daily_report": True, "daily_reminder": True})
     admin = db.Column(db.Boolean, nullable=False, default=False)
 
 
@@ -140,8 +143,9 @@ def pages_information(is_draft=False):
     def format_datetime(dt):
         return dt.strftime('%d %B %Y %H:%M:%S')
     data_contents = ((
-            content.id, content.Class, content.Course, content.Module, getattr(content, 'Creator', ''),
-            format_datetime(content.Created_at), getattr(content, 'Views', 0))
+            content.id, content.Class, content.Course, content.Module,
+            getattr(content, 'Creator', User.query.filter_by(id=content.user_id).first().username),
+            format_datetime(content.Created_at), getattr(content, 'Views', ""))
     for content in all_content)
     return data_contents, classes, courses
 
@@ -275,3 +279,54 @@ def change_role(user_id, role):
         user.admin = False
     db.session.commit()
 
+def change_profile(username, school ,src_img=None):
+    try:
+        print(src_img)
+        if src_img != None:
+            img_data = src_img.split(',')[1]
+            img_type = src_img.split(';')[0].split('/')[1]
+
+            filename = f"{current_user.id}.{img_type}"
+            directory = os.path.join(os.getcwd(), 'website/static/img/profile_pic')
+            if not os.path.exists(directory):
+                os.mkdir(directory)
+            with open(os.path.join(directory, filename), 'wb') as f:
+                f.write(base64.b64decode(img_data))
+            current_user.photo = f"img/profile_pic/{filename}"
+        current_user.username = username
+        current_user.School_name = school
+        db.session.commit()
+    except Exception as e:
+        return e, False
+    else:
+        return "Profil berhasil diubah", True
+
+def change_emailOrPassword(type_change, value):
+    try:
+        if type_change == 'email':
+            current_user.email = value
+            Message = 'Email berhasil diubah'
+        elif type_change == 'password':
+            current_user.password = value
+            Message = 'Password berhasil diubah'
+        db.session.commit()
+    except Exception as e:
+        return e, False
+    else:
+        return Message, True
+
+def change_notif_settings(type_notif, values):
+    try:
+        user = current_user
+        notif_settings = getattr(user, type_notif)
+        notif_settings.update(values)
+        setattr(user, type_notif, notif_settings)
+        db.session.commit()
+    except Exception as e:
+        return e, False
+    else:
+        return "Pengaturan notifikasi berhasil diubah", True
+
+def delete_account():
+    db.session.delete(current_user)
+    db.session.commit()

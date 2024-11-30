@@ -1,9 +1,11 @@
-from flask import Blueprint, render_template, redirect, request, url_for, jsonify
+from flask import Blueprint, render_template, redirect, request, url_for, jsonify, session
 from urllib.parse import quote
-from .models import get_content, TrackViewPoints, TrackFinishPoints, point_information
+from .models import get_content, TrackViewPoints, TrackFinishPoints, point_information, change_profile, change_emailOrPassword, change_notif_settings, delete_account
 import os
 from flask_login import login_required, current_user
 from . import app
+from .auth import check_password, is_emailValid, generated_send_OTP
+
 
 views = Blueprint('views', __name__)
 courses_dir = os.path.join(os.getcwd(), "website/templates/courses")
@@ -63,10 +65,77 @@ def profile():
     user_point, rank_data, chart_data = point_information(range_date='all')
     if request.method == 'POST':
         return jsonify(chart_data)
-    print(rank_data)
     return render_template('user/profile.html', user= current_user, current_url=request.path, user_point=user_point, users_points= rank_data)
 
-@views.route('/settings')
+@views.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
+    if request.method == 'POST':
+        data = request.get_json()
+        type_data = data.get('type')
+        response = {
+        "success": False,
+        "Message": ""
+        }
+        if type_data == 'data-profile':
+            img_data = data.get('photo-pic')
+            if img_data == url_for('static', filename=current_user.photo, _external=True):
+                img_data = None
+            response["Message"], response["success"] = change_profile(src_img=img_data, username=data.get('username'), school=data.get('school'))
+
+        elif type_data == 'notification':
+            type_notif = data.get('notif')
+            response["Message"], response["success"] = change_notif_settings(type_notif=type_notif, values=data.get(type_notif))
+
+        elif type_data == 'update-email':
+            old_email = data.get('old-email')
+            new_email = data.get('new-email')
+            if old_email != current_user.email:
+                response["Message"] = "Email lama tidak sesuai"
+            elif not is_emailValid(new_email):
+                response["Message"] = "Email tidak valid"
+            else:
+                response["success"] = True
+                session['new_email'] = new_email
+                response["Message"] = ("otp-needed", 'email')
+
+        elif type_data == 'update-password':
+            old_password = data.get('old-password')
+            new_password = data.get('new-password')
+            confirm_password = data['confirm-password']
+            password_check = check_password(new_password, confirm_password)
+            if old_password == new_password:
+                response["Message"] = "Password baru tidak boleh sama dengan password lama"
+            elif password_check:
+                response["Message"] = password_check
+            else:
+                response["success"] = True
+                session['new_password'] = new_password
+                response["Message"] = ("otp-needed", 'password')
+
+        elif type_data == 'otp-requested':
+            session['otp'] = generated_send_OTP(current_user.email)
+            response["success"] = True
+            response["Message"] = ("otp-sended", data.get('otp_type'))
+
+        elif type_data == 'otp-confirmation':
+            otp_input = int(data.get('otp'))
+            type_otp = data.get('type-otp')
+            if session['otp'] == otp_input:
+                if type_otp == 'email':
+                    change_value = session.get('new_email')
+                    session.pop('new_email', None)
+                elif type_otp == 'password':
+                    change_value = session.get('new_password')
+                    session.pop('new_password', None)
+                Message, response["success"] = change_emailOrPassword(type_change=type_otp, value=change_value) 
+                response["Message"] = ('otp-confirmed', Message)
+            else:
+                response["Message"] = "OTP tidak sesuai"
+
+        elif type_data == 'delete-account':
+            delete_account(current_user.id)
+            response["success"] = True
+            response["Message"] = "Account berhasil dihapus"
+        return jsonify(response)
     return render_template('user/settings.html', user= current_user, current_url=request.path)

@@ -238,8 +238,8 @@
                 <div id="user-info">
                     <img src="{{ url_for('static', filename=user.photo) }}" alt="profil picture">
                     <div id="user-info-detail">
-                        <h2>Username</h2>
-                        <p>(sekolah)</p>
+                        <h2>{{user.username}}</h2>
+                        <p>{{user.School_name}}</p>
                     </div>    
                 </div>
                 <div class="chart">
