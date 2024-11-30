@@ -5,6 +5,7 @@ import os
 from flask_login import login_required, current_user
 from . import app
 from .auth import check_password, is_emailValid, generated_send_OTP
+from werkzeug.security import generate_password_hash
 
 
 views = Blueprint('views', __name__)
@@ -110,7 +111,7 @@ def settings():
                 response["Message"] = password_check
             else:
                 response["success"] = True
-                session['new_password'] = new_password
+                session['new_password'] = generate_password_hash(new_password)
                 response["Message"] = ("otp-needed", 'password')
 
         elif type_data == 'otp-requested':
