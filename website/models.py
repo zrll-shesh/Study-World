@@ -304,7 +304,7 @@ def change_profile(username, school ,src_img=None):
         current_user.School_name = school
         db.session.commit()
     except Exception as e:
-        return e, False
+        return str(e), False
     else:
         return "Profil berhasil diubah", True
 
