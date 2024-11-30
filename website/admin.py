@@ -111,4 +111,4 @@ def users(number_page=1):
 @admin.route('/settings')
 @admin_required
 def settings():
-    return render_template("admin/home.html", current_url=request.path)
+    return redirect(url_for('views.settings'))

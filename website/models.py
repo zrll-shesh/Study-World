@@ -24,7 +24,6 @@ class User(db.Model, UserMixin):
     email_notif = db.Column(MutableDict.as_mutable(db.JSON), nullable=False, default=lambda: {"daily_report": True, "daily_reminder": True})
     admin = db.Column(db.Boolean, nullable=False, default=False)
 
-
 class Content(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     Class = db.Column(db.String(150), nullable=False, index=True)
@@ -55,6 +54,15 @@ class TempContent(db.Model):
     Visit_point = db.Column(db.Integer, default=0)
     Finish_point = db.Column(db.Integer, default=0)
     Created_at = db.Column(db.DateTime, default=db.func.now())
+
+class Notifications(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    headline = db.Column(db.String(150), nullable=False)
+    message = db.Column(db.Text)
+    receiver = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    sender = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    anoncement = db.Column(db.Boolean, nullable=False, default=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=db.func.now())
 
 def TrackViewPoints(page):
     #track all point and view for each module
