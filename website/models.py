@@ -155,7 +155,7 @@ def pages_information(is_draft=False):
             getattr(content, 'Creator', User.query.filter_by(id=content.user_id).first().username),
             format_datetime(content.Created_at), getattr(content, 'Views', ""))
     for content in all_content)
-    return data_contents, classes, courses
+    return tuple(data_contents), classes, courses
 
 def delete_page(id_content, is_draft=False):
     if is_draft:

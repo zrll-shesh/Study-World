@@ -715,7 +715,7 @@
     function showCroppedImage() {
         let cropped_canvas = getRoundedCanvas(cropper.getCroppedCanvas());
         // convert canvas to base64
-        photo_profile.src = cropped_canvas.toDataURL("image/png");
+        photo_profile.src = cropped_canvas.toDataURL("image/webp");
         togglePopup('crop-photo');
     }
 

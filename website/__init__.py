@@ -3,9 +3,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
 from dotenv import load_dotenv
 from flask_login import LoginManager
-from flask_apscheduler import APScheduler
-from apscheduler.triggers.cron import CronTrigger
-import pytz
+# from flask_apscheduler import APScheduler
+# from apscheduler.triggers.cron import CronTrigger
+# import pytz
 import os 
 
 db = SQLAlchemy()
@@ -47,6 +47,8 @@ def create_app():
         return User.query.get(int(id))
     return app
 
+
+# This is function to schecduling email, you can activate it by uncommenting it
 # def schedule_email(app):
 #     from .email import daily_report, daily_reminder
 #     scheduler = APScheduler()
