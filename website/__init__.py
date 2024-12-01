@@ -3,9 +3,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
 from dotenv import load_dotenv
 from flask_login import LoginManager
-from apscheduler.schedulers.background import BackgroundScheduler
+from flask_apscheduler import APScheduler
 from apscheduler.triggers.cron import CronTrigger
-from pytz import timezone
+import pytz
 import os 
 
 db = SQLAlchemy()
@@ -25,6 +25,7 @@ def create_app():
     app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
     app.config['MAIL_PASSWORD'] =  os.getenv('MAIL_PASSWORD')
     app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')
+    app.config['SCHEDULER_API_ENABLED'] = True
 
     from .views import views
     from .auth import auth
@@ -47,12 +48,13 @@ def create_app():
     return app
 
 def schedule_email(app):
-    with app.app_context():
-        from .email import daily_report, daily_reminder
-        scheduler = BackgroundScheduler(timezone=timezone('Asia/Jakarta'))
-        scheduler.add_job(daily_report, CronTrigger(hour=19, minute=0))
-        scheduler.add_job(daily_reminder, CronTrigger(hour=7, minute=30))
-        scheduler.start()
+    from .email import daily_report, daily_reminder
+    scheduler = APScheduler()
+    timezone = pytz.timezone('Asia/Jakarta')
+    scheduler.add_job(func=daily_report, trigger=CronTrigger(hour=19, minute=0), timezone=timezone, id='daily_report_job')
+    scheduler.add_job(func=daily_reminder, trigger=CronTrigger(hour=7, minute=30), timezone=timezone, id='daily_reminder_job')
+    scheduler.init_app(app)
+    scheduler.start()
 
 def create_database(app):
     if not os.path.exists('website/' + DB_NAME):
