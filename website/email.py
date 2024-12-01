@@ -47,3 +47,6 @@ def daily_reminder():
             html= template.render(user=user.username)
             )
         mail.send(msg)
+
+if __name__ == '__main__':
+    daily_reminder()
