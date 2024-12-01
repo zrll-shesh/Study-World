@@ -2,14 +2,27 @@ from flask import Blueprint, render_template, redirect, url_for, request, jsonif
 from email_validator import validate_email
 from string import punctuation
 from .models import User
-from . import mail, db
-from flask_mail import Message
+from . import db
 from werkzeug.security import generate_password_hash, check_password_hash
-import random
 from flask_login import login_user, login_required, logout_user
-
+from .email import generated_send_OTP
+from datetime import datetime,timedelta
 
 auth = Blueprint('auth', __name__)
+
+def clean_session():
+    preseverved_key = ['_user_id', '_id']
+    data_to_keep = {key: session[key] for key in preseverved_key if key in session}
+    session.clear()
+    session.update(data_to_keep)
+
+def is_otpexpired():
+    otp_timestamp = session.get('otp_timestamp')
+    if otp_timestamp:
+        if (datetime.now() - otp_timestamp) > timedelta(minutes=5):
+            clean_session()
+            return True
+    return False
 
 def is_emailValid(email):
     try:
@@ -18,13 +31,6 @@ def is_emailValid(email):
     except Exception as e:
         print(e)
         return False
-
-def generated_send_OTP(email):
-    otp_code = random.randint(10**5, 10**6)
-    msg = Message("Study World OTP Code", recipients=[email])
-    msg.body = f"Your OTP Code is\n\n{otp_code}"
-    mail.send(msg)
-    return otp_code
 
 def check_password(password1, password2):
     if password1 != password2:
@@ -63,7 +69,6 @@ def login():
             return jsonify({"success": False, 'Message': 'Password salah, coba lagi.'})
     return jsonify({"success": False, 'Message': 'Email tidak ditemukan'})
 
-otp_stored = {}
 @auth.route('/signup', methods=['POST'])
 def signup():
     global new_user
@@ -88,12 +93,10 @@ def signup():
         response['Message'] = password_check
     else:
         response["success"] = True
-        otp_stored[email] = {
-            'username' : name,
-            'password' : generate_password_hash(password1),
-            'otp' : generated_send_OTP(email)
-        }
         session['email'] = email
+        session['username'] = name
+        session['password'] = generate_password_hash(password1)
+        generated_send_OTP(email)
     return jsonify(response)
 
 @auth.route('/otp', methods=['POST'])
@@ -105,12 +108,11 @@ def otp_confirmation():
         "success": False,
         "Message": ""
     }
-    if not email:
-        response['Message'] = "Email tidak ditemukan. Silakan signup terlebih dahulu."
-
-    elif email in otp_stored and otp_stored[email]['otp'] == otp_input:
-        username = otp_stored[email]['username']
-        password = otp_stored[email]['password']
+    if is_otpexpired():
+        response['Message'] = "Kode OTP telah kadaluarsa"
+    elif  session.get('otp_code') == otp_input:
+        username = session.get('username')
+        password = session.get('password')
         if User.query.count() == 0:
             print("You're an admin")
             new_user = User(email=email, username=username, password=password, admin=True)
@@ -120,8 +122,7 @@ def otp_confirmation():
             url = 'views.home'
         db.session.add(new_user)
         db.session.commit()
-        del otp_stored[email]
-        session.pop('email', None)
+        clean_session()
         login_user(new_user, remember=True)
         response = {
             "success": True,

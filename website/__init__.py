@@ -2,8 +2,11 @@ from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
 from dotenv import load_dotenv
-import os 
 from flask_login import LoginManager
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
+from pytz import timezone
+import os 
 
 db = SQLAlchemy()
 DB_NAME = "database.db"
@@ -36,12 +39,20 @@ def create_app():
     app.register_blueprint(admin, url_prefix='/admin/')
 
     create_database(app)
+    schedule_email(app)
 
     @login_manager.user_loader
     def load_user(id):
         return User.query.get(int(id))
-    
     return app
+
+def schedule_email(app):
+    with app.app_context():
+        from .email import daily_report, daily_reminder
+        scheduler = BackgroundScheduler(timezone=timezone('Asia/Jakarta'))
+        scheduler.add_job(daily_report, CronTrigger(hour=19, minute=0))
+        scheduler.add_job(daily_reminder, CronTrigger(hour=7, minute=30))
+        scheduler.start()
 
 def create_database(app):
     if not os.path.exists('website/' + DB_NAME):

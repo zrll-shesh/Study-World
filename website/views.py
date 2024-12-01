@@ -4,7 +4,9 @@ from .models import get_content, TrackViewPoints, TrackFinishPoints, point_infor
 import os
 from flask_login import login_required, current_user
 from . import app
-from .auth import check_password, is_emailValid, generated_send_OTP
+from .auth import check_password, is_emailValid, clean_session, is_otpexpired
+from .email import generated_send_OTP
+from .models import User
 from werkzeug.security import generate_password_hash
 
 
@@ -47,6 +49,7 @@ def course_file_route(class_name, course, course_file):
 @views.route('/home')
 @login_required
 def home():
+    print(session)
     try:
         all_courses = get_content()
         example = [
@@ -95,6 +98,8 @@ def settings():
                 response["Message"] = "Email lama tidak sesuai"
             elif not is_emailValid(new_email):
                 response["Message"] = "Email tidak valid"
+            elif User.query.filter_by(email=new_email).first():
+                response["Message"] = "Email sudah terdaftar"
             else:
                 response["success"] = True
                 session['new_email'] = new_email
@@ -115,28 +120,29 @@ def settings():
                 response["Message"] = ("otp-needed", 'password')
 
         elif type_data == 'otp-requested':
-            session['otp'] = generated_send_OTP(current_user.email)
+            generated_send_OTP(current_user.email)
             response["success"] = True
             response["Message"] = ("otp-sended", data.get('otp_type'))
 
         elif type_data == 'otp-confirmation':
             otp_input = int(data.get('otp'))
             type_otp = data.get('type-otp')
-            if session['otp'] == otp_input:
+            if is_otpexpired():
+                response["Message"] = "Kode OTP telah kadaluarsa"
+            if session['otp_code'] == otp_input:
                 if type_otp == 'email':
                     change_value = session.get('new_email')
-                    session.pop('new_email', None)
                 elif type_otp == 'password':
                     change_value = session.get('new_password')
-                    session.pop('new_password', None)
-                Message, response["success"] = change_emailOrPassword(type_change=type_otp, value=change_value) 
+                Message, response["success"] = change_emailOrPassword(type_change=type_otp, value=change_value)
+                clean_session() 
                 response["Message"] = ('otp-confirmed', Message)
             else:
                 response["Message"] = "OTP tidak sesuai"
-
+        
         elif type_data == 'delete-account':
-            delete_account(current_user.id)
+            delete_account()
             response["success"] = True
-            response["Message"] = "Account berhasil dihapus"
+            response["redirect"] = url_for('auth.logout')
         return jsonify(response)
     return render_template('user/settings.html', user= current_user, current_url=request.path)

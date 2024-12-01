@@ -26,15 +26,17 @@
 
       body {
         min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        max-width: 100vw;
         background: var(--base-clr);
-        flex-direction: column;
-        gap: 10px;
       }
 
       #container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+      }
+      #in-container{
         position: relative;
         max-width: 850px;
         width: 100%;
@@ -280,260 +282,399 @@
           display: none;
         }
       }
-      #alert-error {
-            margin-left: 10px;
-            margin-right: 10px;
-            border: 1px solid #ebccd1;
-            border-radius: 5px;
-            color: #dddddd;
-            background-color: #a5312f;
-            display: flex;
-            justify-content: space-between;
-            border-color: #ff0630;
-            width: 100%;
-            padding: 10px 10px;
-            font-weight: 500;
-      }
-      #close {
-            background: none;
-            border: none;
-            color: #dddddd;
-            font-size: 1em;
-            cursor: pointer;
-          }
-          #otp-confirmation {
-            position: relative;;
-            max-width: 400px;
-            width: 100%;
-            background: #222533;
-            padding: 40px 30px;
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-            perspective: 2700px;
-        }
-        .otp-form{
-            display: flex;
-            align-items: center;
-            flex-direction: column;
-            flex-grow: 1;
-        }
-        .otp-form .title {
-            max-width: 100%;
-            font-size: 35px;
-            font-weight: 500;
-            margin-bottom: 40px;
-            color: var(--text-clr);
-        }
-
-        .otp-form form {
+    #popup-container{
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 3;
+    }
+    .popup{
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        background-color: #222533;
+        border-radius: 10px;
+        padding: 1.8rem 3rem;
+        color:#ffffff;
+        max-width: 450px;
+        width: 100%;
+        form{
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            gap: 20px;
+            padding: 5px;
+            .submit{
+                color:#ffffff;
+                padding: 10px 20px;
+                margin-top: 20px;
+                border-radius: 5px;
+                border: none;
+                cursor: pointer;
+                background-color: var(--accent-clr);
+            }
+            .submit:hover{
+                background-color: #575ce8;
+            }
+            input{
+                font-family: "Poppins", sans-serif;
+                appearance: none;
+            }
+            div{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
         }
-
-        .otp-input-boxes {
-            display: flex;
-            justify-content: space-between;
-            gap: 15px;
-            margin-bottom: 20px;
+    }
+    .back{
+        position: relative;
+        right: 15px;
+        padding: 5px;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        color: #ffffff;
+        background-color: transparent;
+        align-items: center;
+        display: flex;
+        gap: 5px;
+        svg{
+            width: 20px;
+            height: 20px;
         }
+    }
+    .back:hover{
+        background-color: #646363;
+    }
+    #otp-input-boxes {
+        display: flex ;
+        justify-content: space-between;
+        flex-direction: row;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
 
-        .otp-input-box {
-            width: 40px;
-            height: 40px;
-            border: 2px solid #5e6265;
-            border-radius: 5px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #353538;
+    .otp-input-box {
+        width: 40px;
+        height: 40px;
+        border: 2px solid #5e6265;
+        border-radius: 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #353538;
+    }
+
+    .otp-input-box input {
+        width: 100%;
+        height: 100%;
+        font-weight: 600;
+        text-align: center;
+        font-size: 18px;
+        border: none;
+        outline: none;
+        background-color: transparent;
+        color: #ffffff;
+    }
+
+    .otp-input-box:focus-within {
+        border-bottom: 2px solid --accent-clr;
+        border: 3px solid #b8b8b8;
+        border-radius: 5px;
+    }
+
+    .otp-button {
+        width: 100%;
+        background-color: var(--accent-clr);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    .otp-button .otp-input-box:hover {
+        border: 3px solid #b8b8b8;
+        border-radius: 5px;
+    }
+    #messages{
+        position: fixed;
+        right: 0;
+        display: flex;
+        align-items: flex-end;
+        flex-direction: column;
+        z-index: 3;
+        padding: 1rem;
+        gap: 10px;
+    }
+    .message{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 10px;
+        color: #ffffff;
+        padding: 10px;
+        gap: 10px;
+        h2{
+            font-weight: 700;
         }
-
-        .otp-input-box input {
-            width: 100%;
-            height: 100%;
-            font-weight: 600;
-            text-align: center;
-            font-size: 18px;
+        p{
+            font-size: 1rem;
+        }
+        button{
             border: none;
             outline: none;
-            background-color: transparent;
+            background: none;
             color: #ffffff;
-        }
-
-        .otp-input-box:focus-within {
-            border-bottom: 2px solid --accent-clr;
-            border: 3px solid #b8b8b8;
-            border-radius: 5px;
-        }
-
-        .otp-button {
-            width: 100%;
-            background-color: var(--accent-clr);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
+            font-size: 1.8em;
             cursor: pointer;
-            margin-top: 10px;
         }
+    }
+    .icon{
+        background-size: cover;
+        background-position: center;
+        width: 60px;
+        height: 60px;
+    }
+    .success{
+        background-color: #018e01;
+        .icon{
+            background-image: url("{{ url_for('static', filename='img/success.svg') }}");
+        }
+    }
+    .error{
+        background-color: #750202;
+        .icon{
+            background-image: url("{{ url_for('static', filename='img/warning.svg') }}");
+        }
+    }
+    .text-msg{
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .fade-out{
+        opacity: 0;
+        transition: opacity 2s ease-out;
+    }
+    .hidden{
+      display: none !important;
+    }
+    .blur{
+        opacity: 0.5;
+        filter: blur(5px);
+    }
+    #loading{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      img{
+        width: 100vh;
+        height: auto;
+        mix-blend-mode: difference;
+      }
+    }
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
 
-        .otp-button .otp-input-box:hover {
-            border: 3px solid #b8b8b8;
-            border-radius: 5px;
-        }
-        .hidden{
-          display: none !important;
-        }
-        #loading{
-          width: 100vh;
-          height: auto;
-          mix-blend-mode: difference;
-        }
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
     </style>
    </head>
 <body>
-  <img id="loading" class="hidden" src="{{ url_for('static', filename='loading.gif') }}" alt="loading">
-    <div id="alert-error" class="hidden">
-    <div id="alert-error-text"></div>
-        <button type="button" id="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-  <div id="container">
-    <input type="checkbox" id="flip">
-    <div class="cover">
-      <div class="front">
-        <img src="{{ url_for('static', filename='frontImg.jpg') }}" alt="">
-        <div class="text">
-          <span class="text-1">Teman baru membawa <br> petualangan baru</span>
-          <br />
-          <span class="text-2">Ayo mulai</span>
-        </div>
+  <div id="loading" class="hidden">
+    <img src="{{ url_for('static', filename='loading.gif') }}" alt="loading">
+  </div>
+  <div id="popup-container" class="hidden">
+    <div id="otp" class="popup">
+      <div>
+          <button class="back" onclick="togglePopup()">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="#e8eaed"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/></svg>
+              <span>Kembali</span>
+          </button>
       </div>
-      <div class="back">
-        <img class="backImg" src="{{ url_for('static', filename='frontImg.jpg') }}" alt="">
-        <div class="text">
-          <span class="text-1">Ikuti petualangan dengan satu langkah</span>
-          <br />
-          <span class="text-2">Ayo bergabung</span>
-        </div>
+      <div class="title">
+          <h2>Cek Emailmu</h2>
+          <p id="email-msg">Kami telah mengirim kode verifikasi ke </p>
       </div>
-    </div>
-    <div class="forms">
-        <div class="form-content">
-          <div class="login-form">
-            <div class="title">Login</div>
-          <form class="form">
-            <div class="input-boxes">
-              <div class="input-box">
-                <i class="fas fa-envelope"></i>
-                <input type="text" name="email" placeholder="Email" required>
+      <form class="otp" id="otp-confirmation">
+          <input type="hidden" id="type-otp" name="type-otp" >
+          <div id="otp-input-boxes">
+              <div class="otp-input-box">
+                  <input type="number" name="otp1" maxlength="1" required>
               </div>
-              <div class="input-box">
-                <i class="fas fa-lock"></i>
-                <input type="password" name="password" placeholder="Password" required>
-                <i class="fas fa-eye-slash" onclick="togglePasswordVisibility(this)"></i>
+              <div class="otp-input-box">
+                  <input type="number" name="otp2" maxlength="1" required>
               </div>
-              <!-- <div class="text"><a href="#">Forgot password?</a></div> -->
-              <div class="button input-box">
-                <input type="submit" value="Submit">
+              <div class="otp-input-box">
+                  <input type="number" name="otp3" maxlength="1" required>
               </div>
-              <div class="text sign-up-text">Belum punya akun? <label for="flip">Sign up</label></div>
-            </div>
-        </form>
-      </div>
-        <div class="signup-form">
-          <div class="title">Sign up</div>
-        <form class="form">
-            <div class="input-boxes">
-              <div class="input-box">
-                <i class="fas fa-user"></i>
-                <input type="text" name="name" placeholder="Nama Lengkap" required>
+              <div class="otp-input-box">
+                  <input type="number" name="otp4" maxlength="1" required>
               </div>
-              <div class="input-box">
-                <i class="fas fa-envelope"></i>
-                <input type="text" name="email" placeholder="Email" required>
+              <div class="otp-input-box">
+                  <input type="number" name="otp5" maxlength="1" required>
               </div>
-              <div class="input-box">
-                <i class="fas fa-lock"></i>
-                <input type="password" name="password1" placeholder="Create Password" required>
-                <i class="fas fa-eye-slash" onclick="togglePasswordVisibility(this)"></i>
+              <div class="otp-input-box">
+                  <input type="number" name="otp6" maxlength="1" required>
               </div>
-              <div class="input-box">
-                <i class="fas fa-lock"></i>
-                <input type="password" name= "password2" placeholder="Confirm Password" required>
-                <i class="fas fa-eye-slash" onclick="togglePasswordVisibility(this)"></i>
-              </div>
-              <div class="button input-box">
-                <input type="submit" value="Submit">
-              </div>
-              <div class="text sign-up-text">Sudah punya akun? <label for="flip">Login</label></div>
-            </div>
+          </div>
+          <div class="otp-button otp-input-box">
+              <input type="submit" value="Submit">
+          </div>
       </form>
-    </div>
-    </div>
+  </div>
+  </div>
+  <div id="messages"></div>
+  <div id="container">
+    <div id="in-container">
+      <input type="checkbox" id="flip">
+          <div class="cover">
+            <div class="front">
+              <img src="{{ url_for('static', filename='frontImg.jpg') }}" alt="">
+              <div class="text">
+                <span class="text-1">Teman baru membawa <br> petualangan baru</span>
+                <br />
+                <span class="text-2">Ayo mulai</span>
+              </div>
+            </div>
+            <div class="back">
+              <img class="backImg" src="{{ url_for('static', filename='frontImg.jpg') }}" alt="">
+              <div class="text">
+                <span class="text-1">Ikuti petualangan dengan satu langkah</span>
+                <br />
+                <span class="text-2">Ayo bergabung</span>
+              </div>
+            </div>
+          </div>
+      <div class="forms">
+          <div class="form-content">
+            <div class="login-form">
+              <div class="title">Login</div>
+              <form class="form">
+                <div class="input-boxes">
+                  <div class="input-box">
+                    <i class="fas fa-envelope"></i>
+                    <input type="text" name="email" placeholder="Email" required>
+                  </div>
+                  <div class="input-box">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" name="password" placeholder="Password" required>
+                    <i class="fas fa-eye-slash" onclick="togglePasswordVisibility(this)"></i>
+                  </div>
+                  <!-- <div class="text"><a href="#">Forgot password?</a></div> -->
+                  <div class="button input-box">
+                    <input type="submit" value="Submit">
+                  </div>
+                  <div class="text sign-up-text">Belum punya akun? <label for="flip">Sign up</label></div>
+                </div>
+              </form>
+            </div>
+            <div class="signup-form">
+              <div class="title">Sign up</div>
+              <form class="form">
+                  <div class="input-boxes">
+                    <div class="input-box">
+                      <i class="fas fa-user"></i>
+                      <input type="text" name="name" placeholder="Nama Lengkap" required>
+                    </div>
+                    <div class="input-box">
+                      <i class="fas fa-envelope"></i>
+                      <input type="text" name="email" placeholder="Email" required>
+                    </div>
+                    <div class="input-box">
+                      <i class="fas fa-lock"></i>
+                      <input type="password" name="password1" placeholder="Create Password" required>
+                      <i class="fas fa-eye-slash" onclick="togglePasswordVisibility(this)"></i>
+                    </div>
+                    <div class="input-box">
+                      <i class="fas fa-lock"></i>
+                      <input type="password" name= "password2" placeholder="Confirm Password" required>
+                      <i class="fas fa-eye-slash" onclick="togglePasswordVisibility(this)"></i>
+                    </div>
+                    <div class="button input-box">
+                      <input type="submit" value="Submit">
+                    </div>
+                    <div class="text sign-up-text">Sudah punya akun? <label for="flip">Login</label></div>
+                  </div>
+              </form>
+            </div>
+          </div>
+      </div>
     </div>
   </div>
-  <div id="otp-confirmation" class="hidden">
-    <div class="otp-form">
-        <div class="title">OTP Confirmation</div>
-        <form class="otp">
-            <div class="otp-input-boxes">
-                <div class="otp-input-box">
-                    <input type="text" name="otp1" maxlength="1" required>
-                </div>
-                <div class="otp-input-box">
-                    <input type="text" name="otp2" maxlength="1" required>
-                </div>
-                <div class="otp-input-box">
-                    <input type="text" name="otp3" maxlength="1" required>
-                </div>
-                <div class="otp-input-box">
-                    <input type="text" name="otp4" maxlength="1" required>
-                </div>
-                <div class="otp-input-box">
-                    <input type="text" name="otp5" maxlength="1" required>
-                </div>
-                <div class="otp-input-box">
-                    <input type="text" name="otp6" maxlength="1" required>
-                </div>
-            </div>
-            <div class="otp-button otp-input-box">
-                <input type="submit" value="Submit">
-            </div>
-        </form>
-    </div>
-</div>
+
   <script>
-    // function to toggle eye icon
-    function togglePasswordVisibility(icon) {
-      var input = icon.previousElementSibling;
-      if (input.type === "password") {
-        input.type = "text";
-        icon.classList.remove("fa-eye-slash");
-        icon.classList.add("fa-eye");
-      } else {
-        input.type = "password";
-        icon.classList.remove("fa-eye");
-        icon.classList.add("fa-eye-slash");
-      }
+    const container = document.getElementById("container");
+    const popup_container = document.getElementById("popup-container");
+    const loading = document.getElementById("loading");
+
+    //delete message 
+    function delete_el(button){
+      button.parentElement.remove();
     }
-    //function to close alert
-    const closeButtons = document.getElementById('close');
-    closeButtons.addEventListener('click', function() {
-        document.getElementById("alert-error").classList.toggle("hidden")
-    });
-    
+
+      // function to toggle eye icon
+      function togglePasswordVisibility(icon) {
+        let input = icon.previousElementSibling;
+        if (input.type === "password") {
+          input.type = "text";
+          icon.classList.remove("fa-eye-slash");
+          icon.classList.add("fa-eye");
+        } else {
+          input.type = "password";
+          icon.classList.remove("fa-eye");
+          icon.classList.add("fa-eye-slash");
+        }
+      };
+
       function toggleLoading(){
-        document.getElementById("container").classList.toggle("hidden")
-        document.getElementById('loading').classList.toggle("hidden"); 
+        container.classList.toggle("hidden")
+        loading.classList.toggle("hidden"); 
+      };
+
+      //show and hide popup
+      function togglePopup(){
+          popup_container.classList.toggle('hidden');
+          container.classList.toggle('blur');
+      };
+
+      //function create message
+      function create_msg(status, msg){
+          const html = `
+          <div class="message ${status}">
+          <div class="icon"></div>
+          <div class="text-msg">
+              <h2>${status.charAt(0).toUpperCase() + status.slice(1)}</h2>
+              <p>${msg}</p>
+          </div>
+          <button onclick="delete_el(this)">&times;</button>
+          </div>`
+          document.getElementById('messages').insertAdjacentHTML('beforeend', html);
+          const new_child = document.getElementById('messages').lastElementChild;
+          setTimeout(() => {
+              new_child.classList.add('fade-out');
+              setTimeout(() => {
+                  new_child.remove();
+              }, 2000);
+          }, 7000);
       }
 
-    // function to send form data using AJAX
-    document.addEventListener("DOMContentLoaded", function () {
+      // function to send form data using AJAX
       const forms = document.querySelectorAll(".form");
-
       forms.forEach((form, index)=>{
         form.addEventListener("submit", function (event) {
           event.preventDefault();
@@ -543,7 +684,6 @@
             dataObject[key] = value;
           });
           let url = "";
-          document.getElementById('alert-error').classList.add("hidden");
           if (index === 0) {
             url = "{{ url_for('auth.login') }}";
           } else {
@@ -563,48 +703,57 @@
                   window.location.href = data.redirect;
                 }
                 else{
-                  document.getElementById("loading").classList.toggle("hidden")
-                  document.getElementById("otp-confirmation").classList.toggle("hidden");
+                  toggleLoading();
+                  document.getElementById('email-msg').textContent += dataObject["email"];
+                  togglePopup();
                 }
               } else {
                 if (index === 1) {
                   toggleLoading();
                 }
-                document.getElementById('alert-error-text').textContent = data.Message;
-                document.getElementById('alert-error').classList.remove("hidden");
+                create_msg("error", data.Message);
               }
             })
-            .catch(error => {
-              console.error("Error:", error);
-            });
-        })
-      })
-    });
-
-    //function for input otp confirmation
-    document.addEventListener('DOMContentLoaded', function () {
-            // Get all the OTP input fields
-            const otpInputs = document.querySelectorAll('input[name^="otp"]');
-            
-            otpInputs.forEach((input, index) => {
-                input.addEventListener('input', function () {
-                    if (input.value.length === 1 && index < otpInputs.length - 1) {
-                        // Move to the next input field
-                        otpInputs[index + 1].focus();
-                    }
-                });
-    
-                input.addEventListener('keydown', function (event) {
-                    if (event.key === 'Backspace' && input.value.length === 0 && index > 0) {
-                        // Move to the previous input field if Backspace is pressed
-                        otpInputs[index - 1].focus();
-                    }
-                });
-            });
         });
-      
+      });
+
+      // Get all the OTP input fields
+      const otpInputs = document.querySelectorAll('input[name^="otp"]');         
+      otpInputs.forEach((input, index) => {
+          input.addEventListener('input', function () {
+              if (input.value.length === 1 && index < otpInputs.length - 1) {
+                  // Move to the next input field
+                  otpInputs[index + 1].focus();
+              }
+          });
+
+          input.addEventListener('keydown', function (event) {
+              if (event.key === 'Backspace' && input.value.length === 0 && index > 0) {
+                  // Move to the previous input field if Backspace is pressed
+                  otpInputs[index - 1].focus();
+              }
+          });
+
+          input.addEventListener('paste', function (event) {
+            event.preventDefault();
+            input.blur();
+            let pasteData = event.clipboardData.getData('Text');
+            pasteData = pasteData.replace(/[^0-9]/g, '');
+            let i = 0
+            while(i < pasteData.length){
+              if(otpInputs[index + i]){
+                otpInputs[index + i].value = pasteData[i];
+                i++;
+              } else{
+                i--;
+                break;
+              }
+            }
+            otpInputs[index + i].focus();
+          })
+      });
+
       //function for send otp form with AJAX
-      document.addEventListener("DOMContentLoaded", function () {
         const otp_form = document.querySelector(".otp");
         otp_form.addEventListener("submit", function (event) {
           event.preventDefault();
@@ -625,12 +774,10 @@
               if (data.success) {
                 window.location.href = data.redirect;
               } else {
-                document.getElementById('alert-error-text').textContent = data.Message;
-                document.getElementById('alert-error').classList.toggle("hidden");
+                create_msg("error", data.Message);
               }
             })
         })     
-      })
   </script>
 </body>
 </html>
