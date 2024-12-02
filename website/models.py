@@ -150,9 +150,13 @@ def pages_information(is_draft=False):
 
     def format_datetime(dt):
         return dt.strftime('%d %B %Y %H:%M:%S')
+    def def_val(content):
+        if not content.Creator:
+            return User.query.filter_by(id=content.user_id).first().username
+    
     data_contents = ((
             content.id, content.Class, content.Course, content.Module,
-            getattr(content, 'Creator', User.query.filter_by(id=content.user_id).first().username),
+            getattr(content, 'Creator', def_val(content)),
             format_datetime(content.Created_at), getattr(content, 'Views', ""))
     for content in all_content)
     return tuple(data_contents), classes, courses
