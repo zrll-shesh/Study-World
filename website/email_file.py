@@ -2,9 +2,9 @@ import random
 from flask import session
 from flask_mail import Message
 from jinja2 import Template
-from .models import User, DailyTrack
+from website.models import User, DailyTrack
 from sqlalchemy import func
-from . import mail, db
+from website import mail, db
 from datetime import datetime
 import os
 
