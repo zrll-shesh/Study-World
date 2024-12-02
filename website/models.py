@@ -64,38 +64,58 @@ class Notifications(db.Model):
     anoncement = db.Column(db.Boolean, nullable=False, default=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=db.func.now())
 
+def web_notif(headline, message, sender, anoncement=False):
+    # send notification to all users that enable it
+    if anoncement:
+        user_list = User.query.filter(web_notif['anoncement'] == True).all()
+        for user in user_list:
+            notif = Notifications(headline=headline, message=message, receiver=user.id, sender=sender, anoncement=anoncement)
+            db.session.add(notif)
+    else:
+        user = current_user.web_notif['acc_activity']
+        if user:
+            notif = Notifications(headline=headline, message=message, receiver=current_user.id, sender=sender)
+            db.session.add(notif)
+    db.session.commit()
+
+def all_notif():
+    # get all notification
+    all_notif = Notifications.query.filter(Notifications.receiver == current_user.get_id()).order_by(Notifications.timestamp.desc()).all()
+    data = ((
+        notif.headline,
+        notif.message,
+        notif.anoncement,
+    ) for notif in all_notif)
+    return tuple(data)
+
 def TrackViewPoints(page):
     #track all point and view for each module
-    user_id = current_user.get_id()
     page_id = Content.query.filter_by(Module=page).first().id
     page_views = Content.query.filter_by(Module=page).first().Views
-    if user_id:
-        page_views += 1
-        today = db.func.current_date()
-        data = DailyTrack.query.filter_by(user_id=user_id, page=page_id, date=today).first()
-        point = Content.query.get(page_id).Visit_point
-        user = User.query.get(user_id)
-        if data:
-            data.page_view += 1
-            data.user_point += point
-            user.points += point
-        else:
-            new_track = DailyTrack(user_id=user_id, page=page_id, page_view=1, user_point=point)
-            user.points += point
-            db.session.add(new_track)
-        db.session.commit()
+    page_views += 1
+    today = db.func.current_date()
+    data = DailyTrack.query.filter_by(user_id=current_user.id, page=page_id, date=today).first()
+    point = Content.query.get(page_id).Visit_point
+    user = User.query.get(current_user.id)
+    if data:
+        data.page_view += 1
+        data.user_point += point
     else:
-        return
+        new_track = DailyTrack(user_id=current_user.id, page=page_id, page_view=1, user_point=point)
+        db.session.add(new_track)
+    web_notif(headline='Point Membaca', message=f'Selamat kamu berhasil mendapatkan {point} point', sender='Sistem')
+    user.points += point
+    db.session.commit()
     
 def TrackFinishPoints(page):
     # add point if user finish the module
-    user_id = current_user.get_id()
     page_id = Content.query.filter_by(Module=page).first().id
-    data = DailyTrack.query.filter_by(user_id=user_id, page=page_id, date=db.func.current_date()).first()
+    data = DailyTrack.query.filter_by(user_id=current_user.id, page=page_id, date=db.func.current_date()).first()
     point = Content.query.get(page_id).Finish_point
-    user = User.query.get(user_id)
+    user = User.query.get(current_user.id)
     data.user_point += point
     user.points += point
+    web_notif(headline='Point Soal', message=f'Selamat kamu berhasil mendapatkan {point} point', sender='Sistem')
     db.session.commit()
 
 def get_content(is_latest=False):
@@ -151,7 +171,7 @@ def pages_information(is_draft=False):
     def format_datetime(dt):
         return dt.strftime('%d %B %Y %H:%M:%S')
     def def_val(content):
-        if not content.Creator:
+        if not hasattr(content, 'Creator'):
             return User.query.filter_by(id=content.user_id).first().username
     
     data_contents = ((
@@ -168,7 +188,8 @@ def delete_page(id_content, is_draft=False):
         page = Content.query.filter_by(id=id_content).first()
         path_html = os.path.join(os.getcwd(), 'website/templates/courses', page.Class, page.Course, f"{page.Module}.html")
         path_img = os.path.join(os.getcwd(),'website/static/img/courses', page.Class, page.Course, page.Module)
-        shutil.rmtree(path_img)
+        if os.path.exists(path_img):
+            shutil.rmtree(path_img)
         os.remove(path=path_html)
     if page:
         db.session.delete(page)
@@ -240,8 +261,8 @@ def get_tempcontent(id_tempcontent=None, list_path=None):
             temp_content = TempContent(Class=content.Class, Course=content.Course, Module=content.Module, user_id=current_user.get_id(), generated_html=html)
         else:
             temp_content = TempContent(Class="", Course="", Module="", user_id=current_user.get_id())
-            db.session.add(temp_content)
-            db.session.commit()
+        db.session.add(temp_content)
+        db.session.commit()
         return temp_content
 
 def delete_tempcontent(id_tempcontent=None):
@@ -275,7 +296,7 @@ def point_information(range_date=None):
             DailyTrack.user_id == current_user.id
         ).filter(DailyTrack.date.between(start_date, db.func.current_date())).group_by(func.strftime('%Y-%m-%d', DailyTrack.date)).all()
     user_point = User.query.get(current_user.id).points
-    user_point_every_day = tuple((p) for p in user_point_data)
+    user_point_every_day = tuple(tuple(p) for p in user_point_data)
     return user_point, leaderboard, user_point_every_day
 
 def user_information(page_size=10, page_num=1):

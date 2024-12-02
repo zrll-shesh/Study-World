@@ -1,12 +1,11 @@
 from flask import Blueprint, render_template, redirect, request, url_for, jsonify, session
 from urllib.parse import quote
-from .models import get_content, TrackViewPoints, TrackFinishPoints, point_information, change_profile, change_emailOrPassword, change_notif_settings, delete_account
+from .models import get_content,TrackViewPoints, TrackFinishPoints, point_information, change_profile, change_emailOrPassword, change_notif_settings, delete_account, User, all_notif
 import os
 from flask_login import login_required, current_user
 from . import app
 from .auth import check_password, is_emailValid, clean_session, is_otpexpired
 from .email_file import generated_send_OTP
-from .models import User
 from werkzeug.security import generate_password_hash
 
 
@@ -23,6 +22,7 @@ def courses(class_name):
             return render_template('user/courses.html', class_name=class_name,
                                 courses=courses_data, 
                                 classes=all_courses.keys(),
+                                notifications=all_notif(),
                                 current_url=quote(request.path),
                                 user= current_user)
         else:
@@ -49,7 +49,6 @@ def course_file_route(class_name, course, course_file):
 @views.route('/home')
 @login_required
 def home():
-    print(session)
     try:
         all_courses = get_content()
         example = [
@@ -59,21 +58,29 @@ def home():
             {"name": "Fisika", "class": "Kelas X MIPA", "image": "Fisika.webp"},
             {"name": "Python", "class": "Untuk semua", "image": "Python.webp"},
         ]
-        return render_template('user/home.html', classes=all_courses.keys(), courses=example, user= current_user, current_url=request.path)
+        return render_template('user/home.html', classes=all_courses.keys(), courses=example, notifications=all_notif(), user= current_user, current_url=request.path)
     except Exception as e:
         return redirect(url_for(app.handle_exception, e=e))
 
 @views.route('/profile', methods=['GET','POST'])
 @login_required
 def profile():
+    all_courses = get_content()
     user_point, rank_data, chart_data = point_information(range_date='all')
     if request.method == 'POST':
         return jsonify(chart_data)
-    return render_template('user/profile.html', user= current_user, current_url=request.path, user_point=user_point, users_points= rank_data)
+    return render_template('user/profile.html',
+                           user= current_user,
+                           current_url=request.path,
+                           classes=all_courses.keys(),
+                           user_point=user_point,
+                           notifications=all_notif(),
+                           users_points= rank_data)
 
 @views.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
+    all_courses = get_content()
     if request.method == 'POST':
         data = request.get_json()
         type_data = data.get('type')
@@ -145,4 +152,8 @@ def settings():
             response["success"] = True
             response["redirect"] = url_for('auth.logout')
         return jsonify(response)
-    return render_template('user/settings.html', user= current_user, current_url=request.path)
+    return render_template('user/settings.html',
+                           notifications=all_notif(),
+                           classes=all_courses.keys(),
+                           user= current_user,
+                           current_url=request.path)

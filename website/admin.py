@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, request, jsonify
-from .models import get_tempcontent, content_dash, pages_information, delete_page, update_publish, user_information, change_role
+from .models import get_tempcontent, content_dash, pages_information, delete_page, update_publish, user_information, change_role, all_notif
 from flask_login import current_user
 from functools import wraps
 import math
@@ -27,7 +27,7 @@ def home():
             chart_data['views'] = views_every_day
         box_data = (new_user,total_user, total_content, total_views)
         return jsonify({"chart_data": chart_data, "box_data": box_data})
-    return render_template("admin/home.html", current_url=request.path, user=current_user)
+    return render_template("admin/home.html", current_url=request.path, user=current_user, notifications=all_notif())
 
 @admin.route('/page-management', methods=['GET', 'POST'])
 @admin_required
@@ -53,7 +53,7 @@ def pages():
                (str(content[2]) in data[selectedValue].get("courses",[]))
         ]
         return render_template("admin/page_update.html", classes=classes, courses=courses, content_data=filtered_content, draft=is_draft)
-    return render_template("admin/page-management.html", current_url=request.path, classes=classes, courses=courses, content_data=data_content, user=current_user)
+    return render_template("admin/page-management.html", current_url=request.path, classes=classes, courses=courses, content_data=data_content, user=current_user, notifications=all_notif())
 
 @admin.route('/add-post')
 @admin_required
@@ -67,6 +67,7 @@ def add_page():
 def edit_module(tempcontent_id = None, class_name = None, course = None, course_file=None):
     if class_name and course and course_file:
         temp_content = get_tempcontent(list_path=[class_name, course, course_file])
+        print(temp_content.id)
         return redirect(url_for('admin.edit_module', tempcontent_id=temp_content.id))
     data = get_tempcontent(tempcontent_id)
     return render_template("admin/add_update.html", data=data)
@@ -106,7 +107,7 @@ def users(number_page=1):
         return jsonify({"success": True})
     total_users, users = user_information(page_size=10, page_num=number_page)
     total_pages = math.ceil(total_users/10) 
-    return render_template("admin/user-management.html", current_url=request.path, total_pages=total_pages, users=users, user=current_user)
+    return render_template("admin/user-management.html", current_url=request.path, total_pages=total_pages, users=users, user=current_user, notifications=all_notif())
 
 @admin.route('/settings')
 @admin_required
