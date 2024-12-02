@@ -5,7 +5,7 @@ import os
 from flask_login import login_required, current_user
 from . import app
 from .auth import check_password, is_emailValid, clean_session, is_otpexpired
-from .email import generated_send_OTP
+from .email_file import generated_send_OTP
 from .models import User
 from werkzeug.security import generate_password_hash
 

@@ -5,7 +5,7 @@ from .models import User
 from . import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, login_required, logout_user
-from .email import generated_send_OTP
+from .email_file import generated_send_OTP
 from datetime import datetime,timedelta
 
 auth = Blueprint('auth', __name__)

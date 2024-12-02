@@ -49,6 +49,7 @@ def create_app():
 
 
 # This is function to schecduling email, you can activate it by uncommenting it
+# I don't use it because pythonanywhere doesn't support multi thread
 # def schedule_email(app):
 #     from .email import daily_report, daily_reminder
 #     scheduler = APScheduler()
