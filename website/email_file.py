@@ -4,8 +4,8 @@ from flask_mail import Message
 from jinja2 import Template
 from website.models import User, DailyTrack
 from sqlalchemy import func
-from website import mail, db, app
-from datetime import datetime
+from website import mail, db
+from datetime import datetime, timezone
 import os
 
 def generated_send_OTP(email):
