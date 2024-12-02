@@ -19,7 +19,7 @@ def generated_send_OTP(email):
         )
     mail.send(msg)
     session['otp_code'] = otp_code
-    session['otp_timestamp'] = datetime.now()
+    session['otp_timestamp'] = datetime.now(timezone.utc)
 
 def daily_report():
     with open(os.path.join(os.getcwd(), 'website/templates/mail/daily_report.html'), 'r', encoding='utf-8') as file:

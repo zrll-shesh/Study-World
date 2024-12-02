@@ -6,7 +6,7 @@ from . import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, login_required, logout_user
 from .email_file import generated_send_OTP
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta, timezone
 
 auth = Blueprint('auth', __name__)
 
@@ -19,7 +19,7 @@ def clean_session():
 def is_otpexpired():
     otp_timestamp = session.get('otp_timestamp')
     if otp_timestamp:
-        if (datetime.now() - otp_timestamp) > timedelta(minutes=5):
+        if (datetime.now(timezone.utc) - otp_timestamp) > timedelta(minutes=5):
             clean_session()
             return True
     return False

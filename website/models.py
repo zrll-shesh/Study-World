@@ -235,7 +235,7 @@ def get_tempcontent(id_tempcontent=None, list_path=None):
     else:
         if list_path:
             content = Content.query.filter_by(Class=list_path[0], Course=list_path[1], Module=list_path[2]).first()
-            with open(os.path.join(os.getcwd(), 'website/static/courses', list_path[0], list_path[1], f"{list_path[2]}.html"), 'r', encoding='utf-8') as file:
+            with open(os.path.join(os.getcwd(), 'website/templates/courses', list_path[0], list_path[1], f"{list_path[2]}.html"), 'r', encoding='utf-8') as file:
                 html = file.read()
             temp_content = TempContent(Class=content.Class, Course=content.Course, Module=content.Module, user_id=current_user.get_id(), generated_html=html)
         else:
