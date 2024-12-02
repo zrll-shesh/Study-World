@@ -1,1 +1,1 @@
-# Study-World
+# StudyWorld
