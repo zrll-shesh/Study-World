@@ -1,10 +1,11 @@
 import random
 from flask import session
 from flask_mail import Message
+from flask import url_for
 from jinja2 import Template
 from website.models import User, DailyTrack
 from sqlalchemy import func
-from website import mail, db
+from website import mail, db, app
 from datetime import datetime
 import os
 
@@ -32,7 +33,7 @@ def daily_report():
         msg = Message(
             subject="Laporan Harian Study World", 
             recipients=[user.email],
-            html= template.render(user=user.username, points=points, total_points=user.points)
+            html= template.render(user=user.username, points=points, total_points=user.points, url_for=url_for)
             )
         mail.send(msg)
 
@@ -44,9 +45,6 @@ def daily_reminder():
         msg = Message(
             subject="Pengingat Harian Study World", 
             recipients=[user.email],
-            html= template.render(user=user.username)
+            html= template.render(user=user.username, url_for=url_for)
             )
         mail.send(msg)
-
-if __name__ == '__main__':
-    daily_reminder()
