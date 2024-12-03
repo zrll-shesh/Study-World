@@ -385,7 +385,11 @@
                 const value = data.map(item => item[1])
                 myChart.data.datasets[0].data = value;
                 let MaxValue = Math.max(...value)
-                let suggestedMax = MaxValue + (MaxValue * 0.3);
+                if (window.innerWidth <= 768){
+                    let suggestedMax = MaxValue + (MaxValue * 0.5);
+                }else{
+                    let suggestedMax = MaxValue + (MaxValue * 0.3);
+                }
                 myChart.options.scales.y.suggestedMax = suggestedMax; 
                 myChart.update();
             }
