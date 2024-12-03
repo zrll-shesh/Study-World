@@ -185,16 +185,7 @@
             text-align: center;
             border-bottom: 1px solid #8a8a8a;
         }
-        #message {
-            color: #ffffff;
-            font-size: 1.2rem;
-            margin-top: 10px;
-            margin-bottom: 10px;
-            background-color: #8a8a8a;
-            border-radius: 5px;
-            position: absolute;
-            justify-self: flex-end;
-        }
+        
         select{
             background-color: #555555;
             font-size: 1rem;
@@ -208,6 +199,66 @@
         select:hover{
             background-color: #8a8a8a;
         }
+        #messages{
+        position: fixed;
+        right: 0;
+        display: flex;
+        align-items: flex-end;
+        flex-direction: column;
+        z-index: 3;
+        padding: 1rem;
+        gap: 10px;
+    }
+    .message{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 10px;
+        color: #ffffff;
+        padding: 10px;
+        gap: 10px;
+        h2{
+            font-weight: 700;
+        }
+        p{
+            font-size: 1rem;
+        }
+        button{
+            border: none;
+            outline: none;
+            background: none;
+            color: #ffffff;
+            font-size: 1.8em;
+            cursor: pointer;
+        }
+    }
+    .icon{
+        background-size: cover;
+        background-position: center;
+        width: 60px;
+        height: 60px;
+    }
+    .success{
+        background-color: #018e01;
+        .icon{
+            background-image: url("{{ url_for('static', filename='img/success.svg') }}");
+        }
+    }
+    .error{
+        background-color: #750202;
+        .icon{
+            background-image: url("{{ url_for('static', filename='img/warning.svg') }}");
+        }
+    }
+    .text-msg{
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .fade-out{
+        opacity: 0;
+        transition: opacity 2s ease-out;
+    }
         #pagination {
             margin-top: auto;
             justify-self: flex-end;
@@ -275,34 +326,36 @@
             {% endfor %}
         </ul>
     </div>
-    <div id="message"></div>
-    <table>
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Points</th>
-                <th>Role</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
-            <tr>
-                <td>{{ user.id }}</td>
-                <td>{{ user.username }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.points }}</td>
-                <td>
-                    <select class="role">
-                        <option value="admin" {% if user.admin %}selected{% endif %}>Admin</option>                        
-                        <option value="user" {% if not user.admin %}selected{% endif %}>User</option>
-                    </select>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div id="messages"></div>
+    <div>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Points</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.points }}</td>
+                    <td>
+                        <select class="role">
+                            <option value="admin" {% if user.admin %}selected{% endif %}>Admin</option>                        
+                            <option value="user" {% if not user.admin %}selected{% endif %}>User</option>
+                        </select>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     <div id="pagination">
     </div>
 {% endblock %}
@@ -385,6 +438,26 @@ function generatePagination() {
         window.location.href = `{{url_for('admin.users', number_page=page)}}`;
     }
 
+    function create_msg(status, msg){
+          const html = `
+          <div class="message ${status}">
+          <div class="icon"></div>
+          <div class="text-msg">
+              <h2>${status.charAt(0).toUpperCase() + status.slice(1)}</h2>
+              <p>${msg}</p>
+          </div>
+          <button onclick="delete_el(this)">&times;</button>
+          </div>`
+          document.getElementById('messages').insertAdjacentHTML('beforeend', html);
+          const new_child = document.getElementById('messages').lastElementChild;
+          setTimeout(() => {
+              new_child.classList.add('fade-out');
+              setTimeout(() => {
+                  new_child.remove();
+              }, 2000);
+          }, 7000);
+      }
+
     const roles = document.querySelectorAll('.role')
     roles.forEach(role =>{
         const original_value = role.value;
@@ -402,7 +475,10 @@ function generatePagination() {
                     })
                 }).then(response => {
                     if (response.ok) {
-                        document.getElementById('message').textContent = username + "'s role has been changed to " + role.value;
+                        create_msg('success', `${username}'s role has been changed to ${role.value}`);
+                    }
+                    else{
+                        create_msg('error', 'There was an error')
                     }
                 });
             } else{
